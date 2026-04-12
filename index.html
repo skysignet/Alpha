@@ -109,7 +109,9 @@
   .formkit-form .formkit-input:focus { border-color:var(--gold-dim) !important; }
   .formkit-form .formkit-submit { background:var(--gold) !important; color:var(--black) !important; font-family:var(--cinzel) !important; font-size:.65rem !important; letter-spacing:.3em !important; text-transform:uppercase !important; border:none !important; padding:.95rem 2rem !important; cursor:pointer !important; border-radius:0 !important; transition:background .3s !important; white-space:nowrap !important; }
   .formkit-form .formkit-submit:hover { background:var(--gold-light) !important; }
-  .formkit-form .formkit-fields { display:flex !important; gap:0 !important; }
+  .formkit-form .formkit-fields { display:flex !important; gap:0 !important; flex-wrap:nowrap !important; align-items:stretch !important; }
+  .formkit-form .formkit-field { flex:1 !important; display:block !important; }
+  .formkit-form .formkit-input { display:block !important; visibility:visible !important; opacity:1 !important; }
   .formkit-form[data-uid] h1,
   .formkit-form[data-uid] h2,
   .formkit-form[data-uid] p,
