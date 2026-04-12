@@ -100,26 +100,17 @@
   .email-capture .section-title { max-width:600px; margin:0 auto 1rem; }
   .email-capture__sub { font-size:1.05rem; font-style:italic; color:var(--muted); max-width:460px; margin:0 auto 3rem; line-height:2; }
 
-  /* Kit form overrides */
-  .formkit-form { background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; max-width:480px !important; margin:0 auto !important; }
-  .formkit-form * { font-family:var(--cormorant) !important; }
-  .formkit-form[data-uid] .formkit-field { margin-bottom:0 !important; }
-  .formkit-form .formkit-input { background:var(--card) !important; border:1px solid var(--border) !important; border-right:none !important; color:var(--cream) !important; font-family:var(--cormorant) !important; font-size:1rem !important; padding:.95rem 1.2rem !important; border-radius:0 !important; outline:none !important; width:100% !important; }
-  .formkit-form .formkit-input::placeholder { color:var(--muted) !important; font-style:italic !important; }
-  .formkit-form .formkit-input:focus { border-color:var(--gold-dim) !important; }
-  .formkit-form .formkit-submit { background:var(--gold) !important; color:var(--black) !important; font-family:var(--cinzel) !important; font-size:.65rem !important; letter-spacing:.3em !important; text-transform:uppercase !important; border:none !important; padding:.95rem 2rem !important; cursor:pointer !important; border-radius:0 !important; transition:background .3s !important; white-space:nowrap !important; }
-  .formkit-form .formkit-submit:hover { background:var(--gold-light) !important; }
-  .formkit-form .formkit-fields { display:flex !important; gap:0 !important; flex-wrap:nowrap !important; align-items:stretch !important; }
-  .formkit-form .formkit-field { flex:1 !important; display:block !important; }
-  .formkit-form .formkit-input { display:block !important; visibility:visible !important; opacity:1 !important; }
-  .formkit-form[data-uid] h1,
-  .formkit-form[data-uid] h2,
-  .formkit-form[data-uid] p,
-  .formkit-form[data-uid] .formkit-header,
-  .formkit-form[data-uid] .formkit-subheader { display:none !important; }
-  .formkit-powered-by-convertkit { display:none !important; }
-  .formkit-form .formkit-guarantee { display:none !important; }
-  .formkit-alert { font-family:var(--cinzel) !important; font-size:.6rem !important; letter-spacing:.2em !important; color:var(--gold) !important; text-align:center !important; margin-top:1rem !important; }
+  /* Kit native form */
+  .kit-form-wrap { max-width:520px; margin:0 auto; }
+  .kit-form__row { display:flex; gap:0; }
+  .kit-form__input { flex:1; background:var(--card); border:1px solid var(--border); border-right:none; color:var(--cream); font-family:var(--cormorant); font-size:1.05rem; padding:.95rem 1.2rem; outline:none; transition:border-color .3s; -webkit-appearance:none; }
+  .kit-form__input::placeholder { color:var(--muted); font-style:italic; }
+  .kit-form__input:focus { border-color:var(--gold-dim); }
+  .kit-form__btn { background:var(--gold); color:var(--black); font-family:var(--cinzel); font-size:.65rem; letter-spacing:.3em; text-transform:uppercase; border:none; padding:.95rem 2rem; cursor:pointer; transition:background .3s, transform .2s; white-space:nowrap; }
+  .kit-form__btn:hover { background:var(--gold-light); transform:translateY(-1px); }
+  .kit-form__btn:disabled { opacity:.6; cursor:default; transform:none; }
+  .kit-form__msg { font-family:var(--cinzel); font-size:.58rem; letter-spacing:.2em; text-align:center; margin-top:1.2rem; min-height:1.2em; }
+  @media(max-width:500px){ .kit-form__row { flex-direction:column; } .kit-form__input { border-right:1px solid var(--border); border-bottom:none; } }
 
   /* CONFIGURATOR */
   .configurator { padding:3.75rem 0; }
@@ -350,7 +341,46 @@
     <span class="section-label">✦ Stay Close ✦</span>
     <h2 class="section-title">Be First to Know</h2>
     <p class="email-capture__sub">New commissions open in limited windows. Enter your email and you'll hear first — along with dispatches on the craft, the cosmos, and the work in progress.</p>
-    <script async data-uid="683bdf36b8" src="https://skysignet.kit.com/683bdf36b8/index.js"></script>
+    <div class="kit-form-wrap">
+      <form id="kitForm" class="kit-form">
+        <div class="kit-form__row">
+          <input type="email" id="kitEmail" class="kit-form__input" placeholder="your@email.com" required autocomplete="email">
+          <button type="submit" class="kit-form__btn">Reserve My Place</button>
+        </div>
+        <p class="kit-form__msg" id="kitMsg"></p>
+      </form>
+    </div>
+    <script>
+    document.getElementById('kitForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('kitEmail').value;
+      const msg = document.getElementById('kitMsg');
+      const btn = this.querySelector('button');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
+        });
+        const data = await res.json();
+        if(data.subscription) {
+          msg.textContent = '✦ You are on the list. We will be in touch.';
+          msg.style.color = 'var(--gold)';
+          document.getElementById('kitEmail').value = '';
+          btn.textContent = 'Reserved';
+        } else {
+          throw new Error();
+        }
+      } catch(err) {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.style.color = 'var(--muted)';
+        btn.textContent = 'Reserve My Place';
+        btn.disabled = false;
+      }
+    });
+    </script>
   </div>
 </section>
 
