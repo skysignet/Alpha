@@ -93,6 +93,32 @@
   .gallery__item:hover { border-color:var(--gold-dim); }
   .gallery__item .glyph { font-size:1.6rem; opacity:.25; }
 
+  /* EMAIL CAPTURE */
+  .email-capture { padding:5rem 0; text-align:center; border-top:1px solid var(--border); border-bottom:1px solid var(--border); position:relative; overflow:hidden; }
+  .email-capture::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 0%, rgba(196,160,90,.06) 0%, transparent 70%); pointer-events:none; }
+  .email-capture .section-label { text-align:center; }
+  .email-capture .section-title { max-width:600px; margin:0 auto 1rem; }
+  .email-capture__sub { font-size:1.05rem; font-style:italic; color:var(--muted); max-width:460px; margin:0 auto 3rem; line-height:2; }
+
+  /* Kit form overrides */
+  .formkit-form { background:transparent !important; border:none !important; box-shadow:none !important; padding:0 !important; max-width:480px !important; margin:0 auto !important; }
+  .formkit-form * { font-family:var(--cormorant) !important; }
+  .formkit-form[data-uid] .formkit-field { margin-bottom:0 !important; }
+  .formkit-form .formkit-input { background:var(--card) !important; border:1px solid var(--border) !important; border-right:none !important; color:var(--cream) !important; font-family:var(--cormorant) !important; font-size:1rem !important; padding:.95rem 1.2rem !important; border-radius:0 !important; outline:none !important; width:100% !important; }
+  .formkit-form .formkit-input::placeholder { color:var(--muted) !important; font-style:italic !important; }
+  .formkit-form .formkit-input:focus { border-color:var(--gold-dim) !important; }
+  .formkit-form .formkit-submit { background:var(--gold) !important; color:var(--black) !important; font-family:var(--cinzel) !important; font-size:.65rem !important; letter-spacing:.3em !important; text-transform:uppercase !important; border:none !important; padding:.95rem 2rem !important; cursor:pointer !important; border-radius:0 !important; transition:background .3s !important; white-space:nowrap !important; }
+  .formkit-form .formkit-submit:hover { background:var(--gold-light) !important; }
+  .formkit-form .formkit-fields { display:flex !important; gap:0 !important; }
+  .formkit-form[data-uid] h1,
+  .formkit-form[data-uid] h2,
+  .formkit-form[data-uid] p,
+  .formkit-form[data-uid] .formkit-header,
+  .formkit-form[data-uid] .formkit-subheader { display:none !important; }
+  .formkit-powered-by-convertkit { display:none !important; }
+  .formkit-form .formkit-guarantee { display:none !important; }
+  .formkit-alert { font-family:var(--cinzel) !important; font-size:.6rem !important; letter-spacing:.2em !important; color:var(--gold) !important; text-align:center !important; margin-top:1rem !important; }
+
   /* CONFIGURATOR */
   .configurator { padding:3.75rem 0; }
   .configurator__header { text-align:center; margin-bottom:2.625rem; }
@@ -313,6 +339,16 @@
       <div class="gallery__item"><span class="glyph">✦</span>Interior</div>
       <div class="gallery__item"><span class="glyph">☽</span>Worn</div>
     </div>
+  </div>
+</section>
+
+<!-- EMAIL CAPTURE -->
+<section class="email-capture section reveal">
+  <div class="container">
+    <span class="section-label">✦ Stay Close ✦</span>
+    <h2 class="section-title">Be First to Know</h2>
+    <p class="email-capture__sub">New commissions open in limited windows. Enter your email and you'll hear first — along with dispatches on the craft, the cosmos, and the work in progress.</p>
+    <script async data-uid="683bdf36b8" src="https://skysignet.kit.com/683bdf36b8/index.js"></script>
   </div>
 </section>
 
