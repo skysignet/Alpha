@@ -1011,13 +1011,13 @@ function renderStoredOrrery(wrapId, tableId) {
 function renderNatalChart(wrap, tableId, planets, houses, angles) {
 
   const PLANET_DEFS = [
-    { key: 'Moon',      glyph: '\u263d', label: 'Moon',      color: '#d8cfc0', ringR: 0.14 },
-    { key: 'Mercury',   glyph: '\u263f', label: 'Mercury',   color: '#c4a05a', ringR: 0.22 },
-    { key: 'Venus',     glyph: '\u2640', label: 'Venus',     color: '#e8d08a', ringR: 0.30 },
-    { key: 'Sun',       glyph: '\u2609', label: 'Sun',       color: '#f0e8d5', ringR: 0.39, big: true },
-    { key: 'Mars',      glyph: '\u2642', label: 'Mars',      color: '#c4705a', ringR: 0.47 },
-    { key: 'Jupiter',   glyph: '\u2643', label: 'Jupiter',   color: '#c4a05a', ringR: 0.55 },
-    { key: 'Saturn',    glyph: '\u2644', label: 'Saturn',    color: '#7a7468', ringR: 0.63 },
+    { key: 'Moon',      glyph: '\u263d', label: 'Moon',      color: '#d8cfc0', ringR: 0.13 },
+    { key: 'Mercury',   glyph: '\u263f', label: 'Mercury',   color: '#c4a05a', ringR: 0.25 },
+    { key: 'Venus',     glyph: '\u2640', label: 'Venus',     color: '#e8d08a', ringR: 0.37 },
+    { key: 'Sun',       glyph: '\u2609', label: 'Sun',       color: '#f0e8d5', ringR: 0.50, big: true },
+    { key: 'Mars',      glyph: '\u2642', label: 'Mars',      color: '#c4705a', ringR: 0.62 },
+    { key: 'Jupiter',   glyph: '\u2643', label: 'Jupiter',   color: '#c4a05a', ringR: 0.74 },
+    { key: 'Saturn',    glyph: '\u2644', label: 'Saturn',    color: '#7a7468', ringR: 0.87 },
     { key: 'NorthNode', glyph: '\u260a', label: 'N. Node',   color: '#e8d08a', ringR: null },
     { key: 'SouthNode', glyph: '\u260b', label: 'S. Node',   color: '#7a7468', ringR: null },
   ];
@@ -1047,8 +1047,8 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
   const NS = 'http://www.w3.org/2000/svg';
   const ZR = sz * 0.465;
   const ZI = sz * 0.385;
-  const FP = Math.round(sz * 0.078);
-  const FS = Math.round(sz * 0.060);
+  const FP = Math.round(sz * 0.082);
+  const FS = Math.round(sz * 0.062);
   const DS = 8, DM = 6;
 
   let s = '<svg viewBox="0 0 ' + sz + ' ' + sz + '" xmlns="' + NS + '" style="display:block;width:100%;height:auto;overflow:visible;">';
@@ -1093,32 +1093,29 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
       const midLon = houses[h] + (((nextH - houses[h]) + 360) % 360) / 2;
       const midA = lonToRad(midLon);
       const numR = ZI * 0.70;
-      const FH = Math.round(sz * 0.028);
+      const FH = Math.round(sz * 0.032);
       s += '<text x="' + (cx + Math.cos(midA) * numR).toFixed(1) + '" y="' + (cy + Math.sin(midA) * numR).toFixed(1) + '"';
       s += ' text-anchor="middle" dominant-baseline="central"';
-      s += ' fill="rgba(196,160,90,0.32)" font-size="' + FH + '" font-family="serif">' + hLabels[h] + '</text>';
+      s += ' fill="rgba(196,160,90,0.58)" font-size="' + FH + '" font-family="serif">' + hLabels[h] + '</text>';
     }
   }
 
-  // Orbital rings (inner) — static, not rotated
+  // Orbital rings — one per planet, all uniform featherlight solid lines
   for (const pd of PLANET_DEFS) {
     if (!pd.ringR) continue;
     const rr = pd.ringR * ZI;
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none"';
-    s += ' stroke="rgba(196,160,90,0.12)"';
-    s += ' stroke-width="0.6"';
-    s += '/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none" stroke="rgba(196,160,90,0.13)" stroke-width="0.6"/>';
   }
 
-  // Planet glyphs on inner orbital rings (nodes sit just outside zodiac band)
-  const NODE_R = ZR * 1.06;
+  // Planet glyphs on their orbital rings; nodes outside the zodiac perimeter
+  const NODE_R = ZR * 1.08;
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
     const a  = lonToRad(lon);
     const rr = pd.ringR ? pd.ringR * ZI : NODE_R;
-    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS+2 : DM+1) + '" fill="rgba(8,9,12,0.55)"/>';
-    s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.82)) + '" font-family="serif" opacity="0.97">' + pd.glyph + '</text>';
+    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS+4 : DM+3) + '" fill="rgba(8,9,12,0.65)"/>';
+    s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.85)) + '" font-family="serif" opacity="0.97">' + pd.glyph + '</text>';
   }
 
   // Earth crosshair at center
