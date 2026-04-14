@@ -1047,8 +1047,8 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
   const NS = 'http://www.w3.org/2000/svg';
   const ZR = sz * 0.465;
   const ZI = sz * 0.385;
-  const FP = Math.round(sz * 0.065);
-  const FS = Math.round(sz * 0.050);
+  const FP = Math.round(sz * 0.078);
+  const FS = Math.round(sz * 0.060);
   const DS = 8, DM = 6;
 
   let s = '<svg viewBox="0 0 ' + sz + ' ' + sz + '" xmlns="' + NS + '" style="display:block;width:100%;height:auto;overflow:visible;">';
@@ -1060,8 +1060,8 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + cx + '" fill="url(#ng' + tableId + ')"/>';
 
   // Zodiac band rings
-  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZR + '" fill="none" stroke="rgba(196,160,90,0.55)" stroke-width="1.5"/>';
-  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZI + '" fill="none" stroke="rgba(196,160,90,0.40)" stroke-width="1.0"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZR + '" fill="none" stroke="rgba(196,160,90,0.75)" stroke-width="1.5"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZI + '" fill="none" stroke="rgba(196,160,90,0.60)" stroke-width="1.0"/>';
 
   // 12 sign dividers + glyphs — rotated by same offset
   const SG = ['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
@@ -1086,7 +1086,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
       const x1 = cx + Math.cos(a) * ZI * 0.95, y1 = cy + Math.sin(a) * ZI * 0.95;
       const x2 = cx + Math.cos(a) * ZI * 0.12, y2 = cy + Math.sin(a) * ZI * 0.12;
       s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"';
-      s += ' stroke="' + (isAngle ? 'rgba(196,160,90,0.70)' : 'rgba(196,160,90,0.42)') + '"';
+      s += ' stroke="' + (isAngle ? 'rgba(196,160,90,0.85)' : 'rgba(196,160,90,0.55)') + '"';
       s += ' stroke-width="' + (isAngle ? '1.6' : '0.8') + '"';
       s += ' stroke-dasharray="' + (isAngle ? 'none' : '4,3') + '"/>';
       const nextH = houses[(h + 1) % 12];
@@ -1105,13 +1105,13 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     if (!pd.ringR) continue;
     const rr = pd.ringR * ZI;
     s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none"';
-    s += ' stroke="' + (pd.big ? 'rgba(196,160,90,0.40)' : 'rgba(196,160,90,0.14)') + '"';
-    s += ' stroke-width="' + (pd.big ? '1.4' : '0.7') + '"';
-    s += ' stroke-dasharray="' + (pd.big ? 'none' : '2,5') + '"/>';
+    s += ' stroke="rgba(196,160,90,0.12)"';
+    s += ' stroke-width="0.6"';
+    s += '/>';
   }
 
-  // Planet glyphs on inner orbital rings (nodes sit just inside zodiac band)
-  const NODE_R = ZI * 0.88;
+  // Planet glyphs on inner orbital rings (nodes sit just outside zodiac band)
+  const NODE_R = ZR * 1.06;
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
@@ -1120,10 +1120,6 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS+2 : DM+1) + '" fill="rgba(8,9,12,0.55)"/>';
     s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.82)) + '" font-family="serif" opacity="0.97">' + pd.glyph + '</text>';
   }
-
-    // North Node pointer at 12 o'clock
-  s += '<line x1="' + cx + '" y1="' + (cy - ZI * 0.92) + '" x2="' + cx + '" y2="' + (cy - ZI * 1.02) + '" stroke="rgba(232,208,138,0.80)" stroke-width="2.5" stroke-linecap="round"/>';
-  s += '<text x="' + cx + '" y="' + (cy - ZI * 1.13) + '" text-anchor="middle" dominant-baseline="central" fill="rgba(232,208,138,0.70)" font-size="' + Math.round(sz*0.032) + '" font-family="serif">\u260a</text>';
 
   // Earth crosshair at center
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="rgba(196,160,90,0.85)"/>';
