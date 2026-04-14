@@ -1,180 +1,215 @@
-from http.server import BaseHTTPRequestHandler
+"""
+SkySignet Natal Chart API — pyswisseph backend
+Vercel serverless function: /api/calculate
+
+Query params:
+  date   YYYY-MM-DD
+  time   HH:MM  (local time at birth location)
+  lat    decimal degrees (N positive)
+  lon    decimal degrees (E positive)
+  system tropical | vedic
+
+Returns JSON:
+{
+  "planets": {
+    "sun":     { "lon": 283.32, "sign": "Capricorn", "deg_in_sign": 13.32, "house": 12 },
+    "moon":    { ... },
+    "mercury": { ... },
+    "venus":   { ... },
+    "mars":    { ... },
+    "jupiter": { ... },
+    "saturn":  { ... }
+  },
+  "nodes": {
+    "north": { "lon": 150.20, "sign": "Virgo", "deg_in_sign": 0.20, "house": 8 },
+    "south": { "lon": 330.20, "sign": "Pisces", "deg_in_sign": 0.20, "house": 2 }
+  },
+  "angles": {
+    "ascendant": { "lon": 289.97, "sign": "Capricorn", "deg_in_sign": 19.97 },
+    "mc":        { "lon": 224.95, "sign": "Scorpio",   "deg_in_sign": 14.95 }
+  },
+  "houses": {
+    "system": "Placidus",
+    "cusps": [0.0, 289.97, 320.5, 351.2, 21.4, 52.8, 109.97, 140.5, 171.2, 201.4, 232.8, 260.1, 280.5]
+    // cusps[0] unused, cusps[1] = house 1 cusp = Ascendant, ... cusps[12] = house 12 cusp
+  },
+  "system": "tropical",
+  "input": { "date": "1980-01-04", "time": "07:42", "lat": 41.49, "lon": -71.31 }
+}
+"""
+
 import json
+import swisseph as swe
+from datetime import datetime, timezone
 import math
-from urllib.parse import urlparse, parse_qs
-from skyfield.api import load, wgs84
-from skyfield.elementslib import osculating_elements_of
-from skyfield.framelib import ecliptic_frame
-from dateutil import parser
-import pytz
 
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        query = parse_qs(urlparse(self.path).query)
+# ---------------------------------------------------------------------------
+# Vercel entry point
+# ---------------------------------------------------------------------------
+def handler(request, response):
+    # CORS
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Content-Type"] = "application/json"
 
-        try:
-            birth_date = query.get('date')[0]
-            birth_time = query.get('time')[0]
-            lat        = float(query.get('lat')[0])
-            lon        = float(query.get('lon')[0])
-            system     = query.get('system', ['tropical'])[0]
+    if request.method == "OPTIONS":
+        response.status_code = 200
+        return response.send("")
 
-            ts  = load.timescale()
-            eph = load('de421.bsp')
+    try:
+        params = request.args
+        date_str = params.get("date", "")      # YYYY-MM-DD
+        time_str = params.get("time", "00:00") # HH:MM UTC (frontend converts to UTC before calling)
+        lat      = float(params.get("lat", "0"))
+        lon      = float(params.get("lon", "0"))
+        system   = params.get("system", "tropical").lower()
 
-            # ── Parse UTC datetime ──────────────────────────────────────────
-            dt = parser.parse(f"{birth_date} {birth_time}")
-            t  = ts.from_datetime(dt.replace(tzinfo=pytz.UTC))
+        if not date_str:
+            raise ValueError("Missing required param: date")
 
-            # ── 7 Classical Planets ─────────────────────────────────────────
-            planet_bodies = {
-                'Moon':    eph['moon'],
-                'Mercury': eph['mercury'],
-                'Venus':   eph['venus'],
-                'Sun':     eph['sun'],
-                'Mars':    eph['mars'],
-                'Jupiter': eph['jupiter_barycenter'],
-                'Saturn':  eph['saturn_barycenter'],
-            }
+        result = calculate_chart(date_str, time_str, lat, lon, system)
+        response.status_code = 200
+        return response.send(json.dumps(result))
 
-            results = {}
-            for name, body in planet_bodies.items():
-                astrometric = eph['earth'].at(t).observe(body)
-                _, lon_val, _ = astrometric.apparent().frame_latlon(ecliptic_frame)
-                results[name] = lon_val.degrees
-
-            # ── Lunar Nodes (osculating elements from JPL) ──────────────────
-            moon_pos = (eph['moon'] - eph['earth']).at(t)
-            elements = osculating_elements_of(moon_pos)
-            north_node = elements.longitude_of_ascending_node.degrees % 360
-            south_node = (north_node + 180) % 360
-            results['NorthNode'] = north_node
-            results['SouthNode'] = south_node
-
-            # ── Houses (Placidus) ────────────────────────────────────────────
-            # Requires lat/lon. If not provided (0,0) we skip.
-            houses = None
-            if not (lat == 0 and lon == 0):
-                houses = placidus_houses(t, lat, lon, eph)
-
-            # ── Vedic correction (Lahiri ayanamsa) ───────────────────────────
-            if system == 'vedic':
-                ayanamsa = 24.1
-                for key in results:
-                    results[key] = (results[key] - ayanamsa) % 360
-                if houses:
-                    houses = [(h - ayanamsa) % 360 for h in houses]
-
-            # ── Round everything ─────────────────────────────────────────────
-            results = {k: round(v, 2) for k, v in results.items()}
-            if houses:
-                houses = [round(h, 2) for h in houses]
-
-            payload = {'planets': results}
-            if houses:
-                payload['houses'] = houses
-
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps(payload).encode())
-
-        except Exception as e:
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({'error': str(e)}).encode())
+    except Exception as e:
+        response.status_code = 400
+        return response.send(json.dumps({"error": str(e)}))
 
 
-def placidus_houses(t, lat_deg, lon_deg, eph):
-    """
-    Calculate 12 Placidus house cusps.
-    Returns list of 12 ecliptic longitudes [H1..H12].
-    H1 = Ascendant, H4 = IC, H7 = Descendant, H10 = MC.
-    """
-    # Obliquity of ecliptic
-    earth = eph['earth']
-    sun   = eph['sun']
-    astr  = earth.at(t).observe(sun).apparent()
-    _, sun_lon, _ = astr.frame_latlon(ecliptic_frame)
+# ---------------------------------------------------------------------------
+# Core calculation
+# ---------------------------------------------------------------------------
+ZODIAC_SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer",
+    "Leo", "Virgo", "Libra", "Scorpio",
+    "Sagittarius", "Capricorn", "Aquarius", "Pisces"
+]
 
-    # Use Skyfield to get Greenwich Mean Sidereal Time
-    # then add geographic longitude to get Local Sidereal Time
-    gst = t.gast  # Greenwich Apparent Sidereal Time in hours
-    lst = (gst + lon_deg / 15.0) % 24  # Local Sidereal Time in hours
-    RAMC = math.radians(lst * 15.0)    # Right Ascension of Midheaven (radians)
+PLANET_IDS = {
+    "sun":     swe.SUN,
+    "moon":    swe.MOON,
+    "mercury": swe.MERCURY,
+    "venus":   swe.VENUS,
+    "mars":    swe.MARS,
+    "jupiter": swe.JUPITER,
+    "saturn":  swe.SATURN,
+}
 
-    # Obliquity (mean, J2000 + correction)
-    T   = (t.tt - 2451545.0) / 36525.0
-    eps = math.radians(23.439291111
-                       - 0.013004167 * T
-                       - 0.000000164 * T * T
-                       + 0.000000504 * T * T * T)
+def lon_to_sign(lon):
+    sign_index = int(lon // 30) % 12
+    deg_in_sign = lon % 30
+    return ZODIAC_SIGNS[sign_index], round(deg_in_sign, 4)
 
-    lat = math.radians(lat_deg)
+def which_house(lon, cusps):
+    """Return house number (1-12) given ecliptic longitude and house cusps array."""
+    for i in range(1, 13):
+        next_i = (i % 12) + 1
+        cusp_start = cusps[i]
+        cusp_end   = cusps[next_i]
+        if cusp_end < cusp_start:  # crosses 0°
+            if lon >= cusp_start or lon < cusp_end:
+                return i
+        else:
+            if cusp_start <= lon < cusp_end:
+                return i
+    return 1  # fallback
 
-    # ── MC (Midheaven) ───────────────────────────────────────────────────────
-    MC_ra = math.atan2(math.tan(RAMC), math.cos(eps))
-    MC    = math.degrees(MC_ra) % 360
-    if math.cos(RAMC) < 0:
-        MC = (MC + 180) % 360
+def calculate_chart(date_str, time_str, lat, lon, system):
+    # Parse UTC datetime
+    dt_str = f"{date_str} {time_str}"
+    dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
 
-    # ── Ascendant ────────────────────────────────────────────────────────────
-    Asc = math.degrees(
-        math.atan2(
-            math.cos(RAMC),
-            -math.sin(RAMC) * math.cos(eps) - math.tan(lat) * math.sin(eps)
-        )
-    ) + 180
-    Asc = Asc % 360
+    # Julian Day Number (UT)
+    jd = swe.julday(dt.year, dt.month, dt.day,
+                    dt.hour + dt.minute / 60.0 + dt.second / 3600.0)
 
-    # ── Placidus intermediate cusps (iterative) ──────────────────────────────
-    def placidus_cusp(n, ramc):
-        """
-        n=1 → H11/H3, n=2 → H12/H2
-        ramc: RAMC for upper (above) hemisphere, RAMC+pi for lower
-        """
-        theta = ramc + math.radians(n * 30)
-        for _ in range(30):
-            dec = math.asin(math.sin(eps) * math.sin(theta))
-            # Ascensional difference
-            try:
-                ad = math.asin(
-                    max(-1.0, min(1.0, math.tan(lat) * math.tan(dec)))
-                )
-            except ValueError:
-                ad = 0
-            theta_new = ramc + ad + math.radians(n * 30)
-            if abs(theta_new - theta) < 1e-8:
-                break
-            theta = theta_new
-        dec = math.asin(math.sin(eps) * math.sin(theta))
-        cusp = math.degrees(
-            math.atan2(
-                math.tan(dec),
-                math.cos(lat) * math.cos(theta) + math.sin(lat) * math.sin(theta) * 0
-            )
-        )
-        # Convert to ecliptic longitude via full formula
-        cusp = math.degrees(
-            math.atan2(
-                math.sin(theta) * math.cos(eps) + math.tan(dec) * math.sin(eps),
-                math.cos(theta)
-            )
-        ) % 360
-        return cusp
+    # Ayanamsa for Vedic
+    if system == "vedic":
+        swe.set_sid_mode(swe.SIDM_LAHIRI)
+        flag = swe.FLG_SWIEPH | swe.FLG_SIDEREAL
+        ayanamsa = swe.get_ayanamsa(jd)
+    else:
+        swe.set_sid_mode(swe.SIDM_FAGAN_BRADLEY)  # reset — tropical uses no sidereal mode
+        flag = swe.FLG_SWIEPH
+        ayanamsa = 0.0
 
-    H11 = placidus_cusp(1, RAMC)
-    H12 = placidus_cusp(2, RAMC)
-    H2  = placidus_cusp(1, RAMC + math.pi)
-    H3  = placidus_cusp(2, RAMC + math.pi)
+    # ---------- Houses (Placidus) ----------
+    # swe.houses returns (cusps_tuple_13, ascmc_tuple_10)
+    # cusps[0] = 0.0 (unused), cusps[1] = ASC = house 1, ... cusps[12] = house 12
+    # ascmc[0] = Ascendant, ascmc[1] = MC
+    cusps_raw, ascmc = swe.houses(jd, lat, lon, b'P')  # b'P' = Placidus
+    cusps = list(cusps_raw)  # index 0 unused, 1-12 are house cusps
 
-    IC  = (MC  + 180) % 360
-    Dsc = (Asc + 180) % 360
-    H5  = (H11 + 180) % 360
-    H6  = (H12 + 180) % 360
-    H8  = (H2  + 180) % 360
-    H9  = (H3  + 180) % 360
+    # For Vedic: rotate cusps by ayanamsa
+    if system == "vedic":
+        cusps = [0.0] + [((c - ayanamsa) % 360) for c in cusps[1:]]
+        asc_lon = (ascmc[0] - ayanamsa) % 360
+        mc_lon  = (ascmc[1] - ayanamsa) % 360
+    else:
+        asc_lon = ascmc[0]
+        mc_lon  = ascmc[1]
 
-    return [Asc, H2, H3, IC, H5, H6, Dsc, H8, H9, MC, H11, H12]
+    # ---------- Planets ----------
+    planets = {}
+    for name, pid in PLANET_IDS.items():
+        result, _ = swe.calc_ut(jd, pid, flag)
+        p_lon = result[0]
+        sign, deg_in = lon_to_sign(p_lon)
+        planets[name] = {
+            "lon":        round(p_lon, 4),
+            "sign":       sign,
+            "deg_in_sign": round(deg_in, 4),
+            "house":      which_house(p_lon, cusps)
+        }
+
+    # ---------- True Lunar Node ----------
+    node_result, _ = swe.calc_ut(jd, swe.TRUE_NODE, flag)
+    north_lon = node_result[0]
+    south_lon = (north_lon + 180.0) % 360.0
+
+    north_sign, north_deg = lon_to_sign(north_lon)
+    south_sign, south_deg = lon_to_sign(south_lon)
+
+    nodes = {
+        "north": {
+            "lon":         round(north_lon, 4),
+            "sign":        north_sign,
+            "deg_in_sign": round(north_deg, 4),
+            "house":       which_house(north_lon, cusps)
+        },
+        "south": {
+            "lon":         round(south_lon, 4),
+            "sign":        south_sign,
+            "deg_in_sign": round(south_deg, 4),
+            "house":       which_house(south_lon, cusps)
+        }
+    }
+
+    # ---------- Angles ----------
+    asc_sign, asc_deg = lon_to_sign(asc_lon)
+    mc_sign,  mc_deg  = lon_to_sign(mc_lon)
+    angles = {
+        "ascendant": {"lon": round(asc_lon, 4), "sign": asc_sign, "deg_in_sign": round(asc_deg, 4)},
+        "mc":        {"lon": round(mc_lon,  4), "sign": mc_sign,  "deg_in_sign": round(mc_deg,  4)}
+    }
+
+    # ---------- House cusps as rounded list ----------
+    house_cusps = [round(c, 4) for c in cusps]  # [0] is 0.0 placeholder
+
+    return {
+        "planets": planets,
+        "nodes":   nodes,
+        "angles":  angles,
+        "houses": {
+            "system": "Placidus",
+            "cusps":  house_cusps
+        },
+        "system": system,
+        "input": {
+            "date": date_str,
+            "time": time_str,
+            "lat":  lat,
+            "lon":  lon
+        }
+    }
