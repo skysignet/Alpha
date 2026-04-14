@@ -195,22 +195,52 @@
 
 
   /* NATAL ORRERY */
-  #natal-orrery-wrap, #natal-orrery-wrap-review { margin:2rem auto 0; text-align:center; display:none; }
-  #natal-orrery-wrap.visible, #natal-orrery-wrap-review.visible { display:block; }
-  .orrery-loading { font-family:var(--cinzel); font-size:.58rem; letter-spacing:.3em; color:var(--muted); text-transform:uppercase; padding:2rem 0; }
-  .natal-orrery-container { position:relative; width:min(420px,90vw); margin:0 auto; }
-  #natal-planets-table, #natal-planets-table-review { width:100%; max-width:500px; margin:1.2rem auto 0; border-collapse:collapse; }
-  #natal-planets-table td, #natal-planets-table-review td { padding:.4rem .8rem; font-size:.85rem; color:var(--muted); border-bottom:1px solid rgba(196,160,90,.06); }
-  #natal-planets-table td:first-child, #natal-planets-table-review td:first-child { font-family:var(--cinzel); font-size:.54rem; letter-spacing:.18em; color:var(--gold); text-transform:uppercase; white-space:nowrap; }
-  #natal-planets-table td:last-child, #natal-planets-table-review td:last-child { font-style:italic; color:var(--text); text-align:right; }
-  .natal-section-label { font-family:var(--cinzel); font-size:.52rem; letter-spacing:.22em; color:var(--gold-dim); text-transform:uppercase; padding:.7rem .8rem .2rem; }
-  .natal-error { font-family:var(--cinzel); font-size:.56rem; letter-spacing:.2em; color:var(--muted); font-style:italic; text-align:center; padding:1rem 0; }
-  .natal-tradition-label { font-size:.52rem; font-family:var(--cinzel); letter-spacing:.18em; color:var(--muted); text-transform:uppercase; margin-top:1rem; text-align:center; display:block; }
-  #btn-calculate-chart { background:transparent; border:1px solid var(--gold-dim); color:var(--gold); font-family:var(--cinzel); font-size:.65rem; letter-spacing:.28em; text-transform:uppercase; padding:.9rem 2.4rem; cursor:pointer; transition:all .3s; display:none; margin:1.5rem auto 0; }
-  #btn-calculate-chart:hover { border-color:var(--gold); background:rgba(196,160,90,.06); }
-  #btn-calculate-chart.visible { display:block; }
-  #btn-step2-continue { transition:opacity .4s, background .3s; }
-  #btn-step2-continue:disabled { opacity:.35; cursor:default; background:var(--gold); transform:none; }
+  #natal-orrery-wrap, #natal-orrery-wrap-review {
+    margin: 2rem auto 0; text-align: center; display: none;
+  }
+  #natal-orrery-wrap.visible, #natal-orrery-wrap-review.visible { display: block; }
+  .orrery-loading {
+    font-family: var(--cinzel); font-size: .58rem; letter-spacing: .3em;
+    color: var(--muted); text-transform: uppercase; padding: 2rem 0;
+  }
+  .natal-orrery-container { position: relative; width: min(420px,90vw); margin: 0 auto; }
+  #natal-planets-table, #natal-planets-table-review {
+    width: 100%; max-width: 500px; margin: 1.2rem auto 0; border-collapse: collapse;
+  }
+  #natal-planets-table td, #natal-planets-table-review td {
+    padding: .4rem .8rem; font-size: .85rem; color: var(--muted);
+    border-bottom: 1px solid rgba(196,160,90,.06);
+  }
+  #natal-planets-table td:first-child, #natal-planets-table-review td:first-child {
+    font-family: var(--cinzel); font-size: .54rem; letter-spacing: .18em;
+    color: var(--gold); text-transform: uppercase; white-space: nowrap;
+  }
+  #natal-planets-table td:last-child, #natal-planets-table-review td:last-child {
+    font-style: italic; color: var(--text); text-align: right;
+  }
+  .natal-section-label {
+    font-family: var(--cinzel); font-size: .52rem; letter-spacing: .22em;
+    color: var(--gold-dim); text-transform: uppercase; padding: .7rem .8rem .2rem;
+  }
+  .natal-error {
+    font-family: var(--cinzel); font-size: .56rem; letter-spacing: .2em;
+    color: var(--muted); font-style: italic; text-align: center; padding: 1rem 0;
+  }
+  .natal-tradition-label {
+    font-size: .52rem; font-family: var(--cinzel); letter-spacing: .18em;
+    color: var(--muted); text-transform: uppercase; margin-top: 1rem;
+    text-align: center; display: block;
+  }
+  #btn-calculate-chart {
+    background: transparent; border: 1px solid var(--gold-dim); color: var(--gold);
+    font-family: var(--cinzel); font-size: .65rem; letter-spacing: .28em;
+    text-transform: uppercase; padding: .9rem 2.4rem; cursor: pointer;
+    transition: all .3s; display: none; margin: 1.5rem auto 0;
+  }
+  #btn-calculate-chart:hover { border-color: var(--gold); background: rgba(196,160,90,.06); }
+  #btn-calculate-chart.visible { display: block; }
+  #btn-step2-continue { transition: opacity .4s, background .3s; }
+  #btn-step2-continue:disabled { opacity: .35; cursor: default; background: var(--gold); transform: none; }
 
   @media(max-width:640px){
     .option-grid { grid-template-columns:1fr 1fr; }
@@ -452,7 +482,7 @@
           <button id="btn-calculate-chart" onclick="triggerNatalCalculation()">Calculate My Chart</button>
         </div>
         <div id="natal-orrery-wrap">
-          <p class="orrery-loading">✶ &nbsp; Calculating your sky &nbsp; ✶</p>
+          <p class="orrery-loading">✶ &nbsp; Your chart will appear here &nbsp; ✶</p>
         </div>
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
@@ -604,13 +634,13 @@
     <div class="footer__links">
       <a href="https://jessesky.art">Jesse Sky</a>
       <a href="https://instagram.com/iamjessesky" target="_blank" rel="noopener">Instagram</a>
-      <a href="mailto:info@skysignet.co">Contact</a>
+      <a href="/cdn-cgi/l/email-protection#452c2b232a05362e3c362c222b20316b262a">Contact</a>
     </div>
     <p class="footer__copy">&copy; 2026 Lotus Research &amp; Design, LLC &middot; All rights reserved</p>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const canvas = document.getElementById('starfield');
 const ctx = canvas.getContext('2d');
 let stars = [];
@@ -743,9 +773,14 @@ function selectSystem(s){
   state.system=s;
   document.getElementById('btn-western').classList.toggle('selected',s==='western');
   document.getElementById('btn-vedic').classList.toggle('selected',s==='vedic');
+  // Show calculate button; re-gray Continue if they switch after already calculating
   document.getElementById('btn-calculate-chart').classList.add('visible');
-  document.getElementById('btn-step2-continue').disabled=true;
-  if(_natalCache){const w=document.getElementById('natal-orrery-wrap');w.classList.add('visible');w.innerHTML='<p class="orrery-loading" style="opacity:.5;">✶ &nbsp; Press Calculate to update &nbsp; ✶</p>';}
+  document.getElementById('btn-step2-continue').disabled = true;
+  if(_natalCache){
+    const w = document.getElementById('natal-orrery-wrap');
+    w.classList.add('visible');
+    w.innerHTML = '<p class="orrery-loading" style="opacity:.5;">✶ &nbsp; Press Calculate to update for ' + (s==='vedic'?'Vedic Sidereal':'Western Tropical') + ' &nbsp; ✶</p>';
+  }
 }
 
 const metalIds=['silver','silver-pd','gold14','gold18','platinum'];
@@ -801,7 +836,7 @@ function buildSummary(){
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra;
   document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
-  renderStoredOrrery('natal-orrery-wrap-review','natal-planets-table-review');
+  renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
 function proceedToCheckout(){
@@ -811,206 +846,278 @@ function proceedToCheckout(){
   alert('Stripe integration coming soon. Your commission details have been recorded.');
 }
 
-function toRad(d){return d*Math.PI/180;}
-function toDeg(r){return r*180/Math.PI;}
-function norm360(a){return ((a%360)+360)%360;}
+// ═══════════════════════════════════════════════════════════════════════════════
+// NATAL CHART — calls /api/calculate (Skyfield/JPL backend)
+// All planet math is server-side. This file only renders the result.
+// ═══════════════════════════════════════════════════════════════════════════════
 
-function julianDay(yr,mo,dy,hr,mn,sc){
-  if(mo<=2){yr--;mo+=12;}
-  const A=Math.floor(yr/100),B=2-A+Math.floor(A/4);
-  return Math.floor(365.25*(yr+4716))+Math.floor(30.6001*(mo+1))+dy+B-1524.5+(hr+mn/60+sc/3600)/24;
-}
-function jc(jd){return (jd-2451545.0)/36525.0;}
+let _natalCache = null;  // stores last API response + metadata
 
-function sunLon(T){
-  const L0=norm360(280.46646+36000.76983*T+0.0003032*T*T);
-  const M=norm360(357.52911+35999.05029*T-0.0001537*T*T),Mr=toRad(M);
-  const C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)+(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
-  return norm360(L0+C);
+// Geocode birthplace via Nominatim
+async function geocodePlace(place) {
+  const url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(place) + '&format=json&limit=1';
+  const r = await fetch(url, { headers: { 'User-Agent': 'SkySignetApp/1.0' } });
+  const d = await r.json();
+  return (d && d.length) ? { lat: parseFloat(d[0].lat), lon: parseFloat(d[0].lon) } : null;
 }
-function moonLon(T){
-  const L1=norm360(218.3165+481267.8813*T),D=norm360(297.8502+445267.1115*T);
-  const M=norm360(357.5291+35999.0503*T),Mp=norm360(134.9634+477198.8676*T),F=norm360(93.2721+483202.0175*T);
-  const Dr=toRad(D),Mr=toRad(M),Mpr=toRad(Mp),Fr=toRad(F);
-  let lon=L1;
-  lon+=6.2888*Math.sin(Mpr);lon+=1.2740*Math.sin(2*Dr-Mpr);lon+=0.6583*Math.sin(2*Dr);
-  lon+=0.2136*Math.sin(2*Mpr);lon-=0.1851*Math.sin(Mr);lon-=0.1143*Math.sin(2*Fr);
-  lon+=0.0588*Math.sin(2*Dr-2*Mpr);lon+=0.0572*Math.sin(2*Dr-Mr-Mpr);
-  lon+=0.0533*Math.sin(2*Dr+Mpr);lon+=0.0458*Math.sin(2*Dr-Mr);
-  return norm360(lon);
-}
-function lunarNodes(T){const O=norm360(125.04452-1934.136261*T+0.0020708*T*T);return{north:O,south:norm360(O+180)};}
-function solveKepler(M,e){let E=M;for(let k=0;k<10;k++)E=M+e*Math.sin(E);return E;}
-function planetHelio(T,a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1){
-  const a=a0+a1*T,e=e0+e1*T,lp=norm360(lp0+lp1*T),O=norm360(O0+O1*T),w=norm360(lp-O);
-  const L=norm360(L0+L1*T),M=toRad(norm360(L-lp)),E=solveKepler(M,e);
-  const xh=a*(Math.cos(E)-e),yh=a*Math.sqrt(1-e*e)*Math.sin(E);
-  return{lon:norm360(toDeg(Math.atan2(yh,xh))+w+O),dist:Math.sqrt(xh*xh+yh*yh)};
-}
-function helio2geo(phLon,phDist,earthLon){
-  const phR=toRad(phLon),eR=toRad(earthLon);
-  return norm360(toDeg(Math.atan2(phDist*Math.sin(phR)-Math.sin(eR),phDist*Math.cos(phR)-Math.cos(eR)))+180);
-}
-function computePlanets(jd){
-  const T=jc(jd),sunL=sunLon(T),earthL=norm360(sunL+180),moonL=moonLon(T),nodes=lunarNodes(T);
-  function p(a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1){const h=planetHelio(T,a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1);return helio2geo(h.lon,h.dist,earthL);}
-  return{
-    sun:sunL,moon:moonL,
-    mercury:p(0.38709927,0.00000037,0.20563593,0.00001906,7.00497902,-0.00594749,252.25032350,149472.67411175,77.45779628,0.16047689,48.33076593,-0.12534081),
-    venus:  p(0.72333566,0.00000390,0.00677672,-0.00004107,3.39467605,-0.00078890,181.97909950,58517.81538729,131.60246718,0.00268329,76.67984255,-0.27769418),
-    mars:   p(1.52371034,0.00001847,0.09339410,0.00007882,1.84969142,-0.00813131,355.45332067,19140.30268499,336.06023029,0.44390164,49.55953891,-0.29257343),
-    jupiter:p(5.20288700,-0.00011607,0.04838624,-0.00013253,1.30439695,-0.00183714,34.39644051,3034.74612775,14.72847983,0.21252668,100.47390909,0.20469106),
-    saturn: p(9.53667594,-0.00125060,0.05386179,-0.00050991,2.48599187,0.00193609,49.95424423,1222.49362201,92.59887831,-0.41897216,113.66242448,-0.28867794),
-    uranus: p(19.18916464,-0.00196176,0.04725744,-0.00004397,0.77263783,-0.00242939,313.23810451,428.48202785,170.95427630,0.40805281,74.01692503,0.04240589),
-    neptune:p(30.06992276,0.00026291,0.00859048,0.00005105,1.77004347,0.00035372,304.87997031,218.45945325,44.96476227,-0.32241464,131.78422574,-0.00508664),
-    northNode:nodes.north,southNode:nodes.south,
-  };
-}
-function obliquity(T){return 23.439291111-0.013004167*T-0.000000164*T*T+0.000000504*T*T*T;}
-function localSiderealTime(jd,lonDeg){
-  const T=jc(jd),GMST=norm360(280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T-T*T*T/38710000);
-  return norm360(GMST+lonDeg);
-}
-function placidusHouses(jd,latDeg,lonDeg){
-  const T=jc(jd),eps=toRad(obliquity(T)),RAMC=toRad(localSiderealTime(jd,lonDeg)),lat=toRad(latDeg);
-  const MCra=Math.atan2(Math.tan(RAMC),Math.cos(eps));
-  let MC=norm360(toDeg(MCra));if(Math.cos(RAMC)<0)MC=norm360(MC+180);
-  const Asc=norm360(toDeg(Math.atan2(Math.cos(RAMC),-Math.sin(RAMC)*Math.cos(eps)-Math.tan(lat)*Math.sin(eps)))+180);
-  function placInt(n,ramc){
-    let theta=ramc+toRad(n*30);
-    for(let i=0;i<20;i++){const dec=Math.asin(Math.sin(eps)*Math.sin(theta)),ad=Math.asin(Math.tan(lat)*Math.tan(dec)),nt=ramc+ad+toRad(n*30);if(Math.abs(nt-theta)<0.00001)break;theta=nt;}
-    const dec=Math.asin(Math.sin(eps)*Math.sin(theta));
-    return norm360(toDeg(Math.atan2(Math.tan(dec)/Math.cos(lat+0.0001),Math.cos(theta))));
-  }
-  const H11=placInt(1,RAMC),H12=placInt(2,RAMC),H2=placInt(1,RAMC+Math.PI),H3=placInt(2,RAMC+Math.PI);
-  return[Asc,H2,H3,norm360(MC+180),norm360(H3+180),norm360(H2+180),norm360(Asc+180),norm360(H2+180),norm360(H11+180),MC,H11,H12];
-}
-function lahiriAyanamsa(jd){return 23.85+(jd-2451545.0)*(1/365.25/72.0);}
-const SIGNS=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
-const SIGN_GLYPHS=['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
-function signOf(lon){return SIGNS[Math.floor(lon/30)];}
-function signGlyph(lon){return SIGN_GLYPHS[Math.floor(lon/30)];}
-function degInSign(lon){return (lon%30).toFixed(1);}
-async function geocodePlace(place){
-  const r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(place)+'&format=json&limit=1',{headers:{'User-Agent':'SkySignetApp/1.0'}});
-  const d=await r.json();return(d&&d.length)?{lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon)}:null;
-}
-async function getTZOffset(lat,lon,dateStr){
-  try{
-    const d=await(await fetch('https://timeapi.io/api/TimeZone/coordinate?latitude='+lat+'&longitude='+lon)).json();
-    const fmt=new Intl.DateTimeFormat('en-US',{timeZone:d.timeZone,timeZoneName:'shortOffset'});
-    const tp=fmt.formatToParts(new Date(dateStr+'T12:00:00')).find(p=>p.type==='timeZoneName');
-    if(tp){const m=tp.value.match(/GMT([+-]\d+(?::\d+)?)/);if(m){const[h,mn]=(m[1]+':00').split(':').map(Number);return h+(mn||0)/60;}}
+
+// Get UTC offset for a location + date (DST-aware) via timeapi.io
+async function getTZOffset(lat, lon, dateStr) {
+  try {
+    const d = await (await fetch('https://timeapi.io/api/TimeZone/coordinate?latitude=' + lat + '&longitude=' + lon)).json();
+    const fmt = new Intl.DateTimeFormat('en-US', { timeZone: d.timeZone, timeZoneName: 'shortOffset' });
+    const tp = fmt.formatToParts(new Date(dateStr + 'T12:00:00')).find(p => p.type === 'timeZoneName');
+    if (tp) {
+      const m = tp.value.match(/GMT([+-]\d+(?::\d+)?)/);
+      if (m) { const [h, mn] = (m[1] + ':00').split(':').map(Number); return h + (mn || 0) / 60; }
+    }
     return 0;
-  }catch(e){return 0;}
+  } catch(e) { return 0; }
 }
-let _natalCache=null;
-async function triggerNatalCalculation(){
-  const btn=document.getElementById('btn-calculate-chart'),cont=document.getElementById('btn-step2-continue'),wrap=document.getElementById('natal-orrery-wrap');
-  btn.textContent='Calculating…';btn.disabled=true;
-  wrap.classList.add('visible');wrap.innerHTML='<p class="orrery-loading">\u2736 &nbsp; Calculating your sky &nbsp; \u2736</p>';cont.disabled=true;
-  const bd=document.getElementById('birthdate').value,bt=document.getElementById('birthtime').value||'12:00',bp=document.getElementById('birthplace').value;
-  if(!bd){wrap.innerHTML='<p class="natal-error">Enter your birth date in Step 1 first.</p>';btn.textContent='Calculate My Chart';btn.disabled=false;return;}
-  try{
-    const[yr,mo,dy]=bd.split('-').map(Number),[hr,mn]=bt.split(':').map(Number);
-    let utcOffset=0,geoLat=0,geoLon=0,hasGeo=false;
-    if(bp&&bp.trim().length>1){try{const geo=await geocodePlace(bp);if(geo){geoLat=geo.lat;geoLon=geo.lon;hasGeo=true;utcOffset=await getTZOffset(geoLat,geoLon,bd);}}catch(e){}}
-    const jd=julianDay(yr,mo,dy,hr-utcOffset,mn,0);
-    let positions=computePlanets(jd),houses=null;
-    if(hasGeo){try{houses=placidusHouses(jd,geoLat,geoLon);}catch(e){}}
-    if(state.system==='vedic'){const ayan=lahiriAyanamsa(jd);for(const k in positions)positions[k]=norm360(positions[k]-ayan);if(houses)houses=houses.map(h=>norm360(h-ayan));}
-    _natalCache={positions,houses,hasGeo};
-    renderNatalChart(wrap,'natal-planets-table',positions,houses,hasGeo);
-    cont.disabled=false;btn.textContent='Recalculate';btn.disabled=false;
-  }catch(e){console.error(e);wrap.innerHTML='<p class="natal-error">Could not calculate. Please check your birth data.</p>';btn.textContent='Try Again';btn.disabled=false;}
-}
-function renderStoredOrrery(wrapId,tableId){
-  const wrap=document.getElementById(wrapId);if(!wrap)return;
+
+// Called by "Calculate My Chart" button
+async function triggerNatalCalculation() {
+  const btn   = document.getElementById('btn-calculate-chart');
+  const cont  = document.getElementById('btn-step2-continue');
+  const wrap  = document.getElementById('natal-orrery-wrap');
+
+  btn.textContent = 'Calculating…';
+  btn.disabled = true;
   wrap.classList.add('visible');
-  if(!_natalCache){wrap.innerHTML='<p class="natal-error">Complete Steps 1 and 2 to see your chart here.</p>';return;}
-  renderNatalChart(wrap,tableId,_natalCache.positions,_natalCache.houses,_natalCache.hasGeo);
-}
-function renderNatalChart(wrap,tableId,pos,houses,hasGeo){
-  const pd=[
-    {key:'sun',glyph:'\u2609',label:'Sun',color:'#f0e8d5',ringR:0.39,big:true},
-    {key:'moon',glyph:'\u263d',label:'Moon',color:'#d8cfc0',ringR:0.14},
-    {key:'mercury',glyph:'\u263f',label:'Mercury',color:'#c4a05a',ringR:0.22},
-    {key:'venus',glyph:'\u2640',label:'Venus',color:'#e8d08a',ringR:0.30},
-    {key:'mars',glyph:'\u2642',label:'Mars',color:'#c4705a',ringR:0.47},
-    {key:'jupiter',glyph:'\u2643',label:'Jupiter',color:'#c4a05a',ringR:0.55},
-    {key:'saturn',glyph:'\u2644',label:'Saturn',color:'#7a7468',ringR:0.63},
-    {key:'uranus',glyph:'\u26e2',label:'Uranus',color:'#6ab0c8',ringR:0.70},
-    {key:'neptune',glyph:'\u2646',label:'Neptune',color:'#5a7ac4',ringR:0.77},
-    {key:'northNode',glyph:'\u260a',label:'N. Node',color:'#e8d08a',ringR:null},
-    {key:'southNode',glyph:'\u260b',label:'S. Node',color:'#7a7468',ringR:null},
-  ];
-  const sz=Math.min(420,window.innerWidth*0.90),cx=sz/2,cy=sz/2;
-  const NS='http://www.w3.org/2000/svg';
-  const ZR=sz*0.465,ZI=sz*0.385,FP=Math.round(sz*0.065),FS=Math.round(sz*0.050),FH=Math.round(sz*0.030);
-  const DS=8,DM=6,Dm=5;
-  let s='<svg viewBox="0 0 '+sz+' '+sz+'" xmlns="'+NS+'" style="display:block;width:100%;height:auto;overflow:visible;">';
-  s+='<defs><radialGradient id="ng'+tableId+'" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(196,160,90,0.08)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>';
-  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+cx+'" fill="url(#ng'+tableId+')"/>';
-  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+ZR+'" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>';
-  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+ZI+'" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>';
-  const sg=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
-  for(let i=0;i<12;i++){
-    const aS=toRad(i*30-90),aM=toRad(i*30+15-90);
-    const x1=cx+Math.cos(aS)*ZI,y1=cy+Math.sin(aS)*ZI,x2=cx+Math.cos(aS)*ZR,y2=cy+Math.sin(aS)*ZR;
-    s+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>';
-    const gr=(ZR+ZI)/2;
-    s+='<text x="'+(cx+Math.cos(aM)*gr).toFixed(1)+'" y="'+(cy+Math.sin(aM)*gr).toFixed(1)+'" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="'+FS+'" font-family="serif">'+sg[i]+'</text>';
+  wrap.innerHTML = '<p class="orrery-loading">✶ &nbsp; Consulting the ephemeris &nbsp; ✶</p>';
+  cont.disabled = true;
+
+  const bd = document.getElementById('birthdate').value;
+  const bt = document.getElementById('birthtime').value || '12:00';
+  const bp = document.getElementById('birthplace').value;
+
+  if (!bd) {
+    wrap.innerHTML = '<p class="natal-error">Enter your birth date in Step 1 first.</p>';
+    btn.textContent = 'Calculate My Chart';
+    btn.disabled = false;
+    return;
   }
-  if(houses){
-    const hl=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
-    for(let h=0;h<12;h++){
-      const a=toRad(houses[h]-90),ia=(h===0||h===3||h===6||h===9);
-      const x1=cx+Math.cos(a)*ZI*0.95,y1=cy+Math.sin(a)*ZI*0.95,x2=cx+Math.cos(a)*ZI*0.12,y2=cy+Math.sin(a)*ZI*0.12;
-      s+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+(ia?'rgba(196,160,90,0.55)':'rgba(196,160,90,0.18)')+'" stroke-width="'+(ia?1.4:0.6)+'" stroke-dasharray="'+(ia?'none':'3,3')+'"/>';
-      const mA=toRad(houses[h]+15-90),nR=ZI*0.72;
-      s+='<text x="'+(cx+Math.cos(mA)*nR).toFixed(1)+'" y="'+(cy+Math.sin(mA)*nR).toFixed(1)+'" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.35)" font-size="'+FH+'" font-family="'Cinzel','Palatino Linotype',serif">'+hl[h]+'</text>';
+
+  try {
+    // 1. Geocode birthplace
+    let lat = 0, lon = 0, hasGeo = false, utcOffset = 0;
+    if (bp && bp.trim().length > 1) {
+      try {
+        const geo = await geocodePlace(bp);
+        if (geo) {
+          lat = geo.lat; lon = geo.lon; hasGeo = true;
+          utcOffset = await getTZOffset(lat, lon, bd);
+        }
+      } catch(e) { /* proceed without geo */ }
+    }
+
+    // 2. Convert local birth time to UTC
+    const [hr, mn] = bt.split(':').map(Number);
+    const utcHr = hr - utcOffset;
+    // Handle day rollover
+    let utcDate = new Date(bd + 'T00:00:00Z');
+    utcDate.setUTCHours(utcHr, mn, 0, 0);
+    const utcDateStr = utcDate.toISOString().slice(0, 10);
+    const utcTimeStr = utcDate.toISOString().slice(11, 16);
+
+    // 3. Call the Vercel API
+    const params = new URLSearchParams({
+      date:   utcDateStr,
+      time:   utcTimeStr,
+      lat:    lat.toString(),
+      lon:    lon.toString(),
+      system: state.system === 'vedic' ? 'vedic' : 'tropical'
+    });
+
+    const response = await fetch('/api/calculate?' + params.toString());
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || 'API error ' + response.status);
+    }
+
+    const data = await response.json();
+    // data = { planets: { Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, NorthNode, SouthNode },
+    //          houses:  [H1..H12] (only if birthplace provided) }
+
+    const planets = data.planets;
+    const houses  = data.houses || null;
+
+    _natalCache = { planets, houses, hasGeo, system: state.system };
+
+    renderNatalChart(wrap, 'natal-planets-table', planets, houses);
+
+    cont.disabled = false;
+    btn.textContent = 'Recalculate';
+    btn.disabled = false;
+
+  } catch(e) {
+    console.error('Chart calculation error:', e);
+    wrap.innerHTML = '<p class="natal-error">Could not calculate your chart. Please check your birth data and try again.</p>';
+    btn.textContent = 'Try Again';
+    btn.disabled = false;
+  }
+}
+
+// Re-render from cache (Step 7 review — no re-fetch needed)
+function renderStoredOrrery(wrapId, tableId) {
+  const wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  wrap.classList.add('visible');
+  if (!_natalCache) {
+    wrap.innerHTML = '<p class="natal-error">Complete Steps 1 and 2 to see your chart here.</p>';
+    return;
+  }
+  renderNatalChart(wrap, tableId, _natalCache.planets, _natalCache.houses);
+}
+
+// ── Orrery renderer ─────────────────────────────────────────────────────────
+// Accepts the API response object directly.
+// Key mapping: API returns capitalized keys (Sun, Moon, etc.)
+function renderNatalChart(wrap, tableId, planets, houses) {
+
+  // Planets + nodes from the API
+  const PLANET_DEFS = [
+    { key: 'Moon',      glyph: '\u263d', label: 'Moon',      color: '#d8cfc0', ringR: 0.14 },
+    { key: 'Mercury',   glyph: '\u263f', label: 'Mercury',   color: '#c4a05a', ringR: 0.22 },
+    { key: 'Venus',     glyph: '\u2640', label: 'Venus',     color: '#e8d08a', ringR: 0.30 },
+    { key: 'Sun',       glyph: '\u2609', label: 'Sun',       color: '#f0e8d5', ringR: 0.39, big: true },
+    { key: 'Mars',      glyph: '\u2642', label: 'Mars',      color: '#c4705a', ringR: 0.47 },
+    { key: 'Jupiter',   glyph: '\u2643', label: 'Jupiter',   color: '#c4a05a', ringR: 0.55 },
+    { key: 'Saturn',    glyph: '\u2644', label: 'Saturn',    color: '#7a7468', ringR: 0.63 },
+    { key: 'NorthNode', glyph: '\u260a', label: 'N. Node',   color: '#e8d08a', ringR: null },
+    { key: 'SouthNode', glyph: '\u260b', label: 'S. Node',   color: '#7a7468', ringR: null },
+  ];
+
+  const SIGNS      = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+  const SIGN_GLYPH = ['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
+  const signName   = lon => SIGNS[Math.floor(lon / 30)];
+  const signGlyph  = lon => SIGN_GLYPH[Math.floor(lon / 30)];
+  const degInSign  = lon => (lon % 30).toFixed(2);
+  const toRad      = d => d * Math.PI / 180;
+
+  const sz   = Math.min(420, window.innerWidth * 0.90);
+  const cx   = sz / 2, cy = sz / 2;
+  const NS   = 'http://www.w3.org/2000/svg';
+  const ZR   = sz * 0.465;   // zodiac outer radius
+  const ZI   = sz * 0.385;   // zodiac inner radius
+  const FP   = Math.round(sz * 0.065);  // planet glyph size
+  const FS   = Math.round(sz * 0.050);  // sign glyph size
+  const DS   = 8, DM = 6;   // dot sizes: sun, others
+
+  // ── SVG ──────────────────────────────────────────────────────────────────
+  let s = '<svg viewBox="0 0 ' + sz + ' ' + sz + '" xmlns="' + NS + '" style="display:block;width:100%;height:auto;overflow:visible;">';
+
+  // Background gradient
+  s += '<defs><radialGradient id="ng' + tableId + '" cx="50%" cy="50%" r="50%">';
+  s += '<stop offset="0%" stop-color="rgba(196,160,90,0.08)"/>';
+  s += '<stop offset="100%" stop-color="transparent"/>';
+  s += '</radialGradient></defs>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + cx + '" fill="url(#ng' + tableId + ')"/>';
+
+  // Zodiac band rings
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZR + '" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>';
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZI + '" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>';
+
+  // 12 sign dividers + glyphs
+  const SG = ['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
+  for (let i = 0; i < 12; i++) {
+    const aS = toRad(i * 30 - 90), aM = toRad(i * 30 + 15 - 90);
+    const x1 = cx + Math.cos(aS)*ZI, y1 = cy + Math.sin(aS)*ZI;
+    const x2 = cx + Math.cos(aS)*ZR, y2 = cy + Math.sin(aS)*ZR;
+    s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>';
+    const gr = (ZR + ZI) / 2;
+    s += '<text x="' + (cx+Math.cos(aM)*gr).toFixed(1) + '" y="' + (cy+Math.sin(aM)*gr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="' + FS + '" font-family="serif">' + SG[i] + '</text>';
+  }
+
+  // House lines (Placidus cusps) — only if houses provided
+  if (houses && houses.length === 12) {
+    const hLabels = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    for (let h = 0; h < 12; h++) {
+      const a = toRad(houses[h] - 90);
+      const isAngle = (h === 0 || h === 3 || h === 6 || h === 9);
+      const x1 = cx + Math.cos(a) * ZI * 0.95, y1 = cy + Math.sin(a) * ZI * 0.95;
+      const x2 = cx + Math.cos(a) * ZI * 0.12, y2 = cy + Math.sin(a) * ZI * 0.12;
+      s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"';
+      s += ' stroke="' + (isAngle ? 'rgba(196,160,90,0.55)' : 'rgba(196,160,90,0.18)') + '"';
+      s += ' stroke-width="' + (isAngle ? '1.4' : '0.6') + '"';
+      s += ' stroke-dasharray="' + (isAngle ? 'none' : '3,3') + '"/>';
+      // House number in sector midpoint
+      const midA = toRad(houses[h] + 15 - 90);
+      const numR = ZI * 0.70;
+      const FH   = Math.round(sz * 0.028);
+      s += '<text x="' + (cx + Math.cos(midA) * numR).toFixed(1) + '" y="' + (cy + Math.sin(midA) * numR).toFixed(1) + '"';
+      s += ' text-anchor="middle" dominant-baseline="central"';
+      s += ' fill="rgba(196,160,90,0.32)" font-size="' + FH + '" font-family="serif">' + hLabels[h] + '</text>';
     }
   }
-  for(const p of pd){
-    if(p.ringR===null)continue;
-    const rr=p.ringR*ZI;
-    s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr.toFixed(1)+'" fill="none" stroke="'+(p.big?'rgba(196,160,90,0.40)':'rgba(196,160,90,0.14)')+'" stroke-width="'+(p.big?1.4:0.7)+'" stroke-dasharray="'+(p.big?'none':'2,5')+'"/>';
+
+  // Orbital rings (inner)
+  for (const pd of PLANET_DEFS) {
+    const rr = pd.ringR * ZI;
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none"';
+    s += ' stroke="' + (pd.big ? 'rgba(196,160,90,0.40)' : 'rgba(196,160,90,0.14)') + '"';
+    s += ' stroke-width="' + (pd.big ? '1.4' : '0.7') + '"';
+    s += ' stroke-dasharray="' + (pd.big ? 'none' : '2,5') + '"/>';
   }
-  for(const p of pd){
-    if(p.ringR===null)continue;
-    const lon=pos[p.key];if(lon===undefined)continue;
-    const rr=p.ringR*ZI,a=toRad(lon-90);
-    s+='<circle cx="'+(cx+Math.cos(a)*rr).toFixed(1)+'" cy="'+(cy+Math.sin(a)*rr).toFixed(1)+'" r="'+(p.big?DS:DM)+'" fill="'+p.color+'" opacity="0.88"/>';
+
+  // Planet dots on inner orbital rings
+  for (const pd of PLANET_DEFS) {
+    const lon = planets[pd.key];
+    if (lon === undefined) continue;
+    const rr = pd.ringR * ZI;
+    const a = toRad(lon - 90);
+    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.88"/>';
   }
-  const PR=ZI-sz*0.035,GR=ZI+sz*0.028;
-  for(const p of pd){
-    const lon=pos[p.key];if(lon===undefined)continue;
-    const a=toRad(lon-90),dr=p.big?DS:(p.ringR===null?Dm:DM);
-    s+='<circle cx="'+(cx+Math.cos(a)*PR).toFixed(1)+'" cy="'+(cy+Math.sin(a)*PR).toFixed(1)+'" r="'+dr+'" fill="'+p.color+'" opacity="0.92"/>';
-    s+='<text x="'+(cx+Math.cos(a)*GR).toFixed(1)+'" y="'+(cy+Math.sin(a)*GR).toFixed(1)+'" text-anchor="middle" dominant-baseline="central" fill="'+p.color+'" font-size="'+FP+'" font-family="serif" opacity="0.95">'+p.glyph+'</text>';
+
+  // Planet glyphs + dots on zodiac ring
+  const PR = ZI - sz * 0.035;  // dot position on zodiac ring
+  const GR = ZI + sz * 0.028;  // glyph position just outside zodiac ring
+  for (const pd of PLANET_DEFS) {
+    const lon = planets[pd.key];
+    if (lon === undefined) continue;
+    const a = toRad(lon - 90);
+    // Dot on zodiac ring
+    s += '<circle cx="' + (cx+Math.cos(a)*PR).toFixed(1) + '" cy="' + (cy+Math.sin(a)*PR).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.92"/>';
+    // Glyph outside zodiac ring
+    s += '<text x="' + (cx+Math.cos(a)*GR).toFixed(1) + '" y="' + (cy+Math.sin(a)*GR).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + FP + '" font-family="serif" opacity="0.95">' + pd.glyph + '</text>';
   }
-  s+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="rgba(196,160,90,0.85)"/>';
-  s+='<line x1="'+(cx-9)+'" y1="'+cy+'" x2="'+(cx+9)+'" y2="'+cy+'" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>';
-  s+='<line x1="'+cx+'" y1="'+(cy-9)+'" x2="'+cx+'" y2="'+(cy+9)+'" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>';
-  s+='</svg>';
-  const tD=[
-    {key:'sun',glyph:'☉',label:'Sun'},{key:'moon',glyph:'☽',label:'Moon'},
-    {key:'mercury',glyph:'☿',label:'Mercury'},{key:'venus',glyph:'♀',label:'Venus'},
-    {key:'mars',glyph:'♂',label:'Mars'},{key:'jupiter',glyph:'♃',label:'Jupiter'},
-    {key:'saturn',glyph:'♄',label:'Saturn'},{key:'uranus',glyph:'⛢',label:'Uranus'},
-    {key:'neptune',glyph:'♆',label:'Neptune'},
-    {key:'northNode',glyph:'☊',label:'North Node'},{key:'southNode',glyph:'☋',label:'South Node'},
-  ];
-  let t='<table id="'+tableId+'"><tbody><tr><td colspan="3" class="natal-section-label">Planets &amp; Nodes</td></tr>';
-  for(const p of tD){const lon=pos[p.key];if(lon===undefined)continue;t+='<tr><td>'+p.glyph+' '+p.label+'</td><td>'+signGlyph(lon)+' '+signOf(lon)+'</td><td>'+degInSign(lon)+'°</td></tr>';}
-  if(houses){
-    t+='<tr><td colspan="3" class="natal-section-label">House Cusps · Placidus</td></tr>';
-    const hl=['I — Asc','II','III','IV — IC','V','VI','VII — Dsc','VIII','IX','X — MC','XI','XII'];
-    for(let h=0;h<12;h++)t+='<tr><td>'+hl[h]+'</td><td>'+signGlyph(houses[h])+' '+signOf(houses[h])+'</td><td>'+degInSign(houses[h])+'°</td></tr>';
-  }else{t+='<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Enter birthplace in Step 1 for house cusps</td></tr>';}
-  t+='</tbody></table>';
-  const trad=state.system==='vedic'?'Vedic Sidereal · Lahiri Ayanamsa':'Western Tropical';
-  wrap.innerHTML='<div class="natal-orrery-container">'+s+'</div>'+t+'<span class="natal-tradition-label">'+trad+'</span>';
+
+  // Earth crosshair at center
+  s += '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="rgba(196,160,90,0.85)"/>';
+  s += '<line x1="' + (cx-9) + '" y1="' + cy + '" x2="' + (cx+9) + '" y2="' + cy + '" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>';
+  s += '<line x1="' + cx + '" y1="' + (cy-9) + '" x2="' + cx + '" y2="' + (cy+9) + '" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>';
+  s += '</svg>';
+
+  // ── Planet table ──────────────────────────────────────────────────────────
+  let t = '<table id="' + tableId + '"><tbody>';
+  t += '<tr><td colspan="3" class="natal-section-label">Planets &middot; ' + (_natalCache && _natalCache.system === 'vedic' ? 'Vedic Sidereal' : 'Western Tropical') + '</td></tr>';
+  for (const pd of PLANET_DEFS) {
+    const lon = planets[pd.key];
+    if (lon === undefined) continue;
+    t += '<tr>';
+    t += '<td>' + pd.glyph + ' ' + pd.label + '</td>';
+    t += '<td>' + signGlyph(lon) + ' ' + signName(lon) + '</td>';
+    t += '<td>' + degInSign(lon) + '\u00b0</td>';
+    t += '</tr>';
+  }
+  t += '</tbody></table>';
+
+  // Nodes rows (already in PLANET_DEFS loop above — handled automatically)
+
+  // House cusps section
+  if (houses && houses.length === 12) {
+    t += '<tr><td colspan="3" class="natal-section-label">House Cusps \u00b7 Placidus</td></tr>';
+    const hLabels = ['I \u2014 Asc','II','III','IV \u2014 IC','V','VI','VII \u2014 Dsc','VIII','IX','X \u2014 MC','XI','XII'];
+    for (let h = 0; h < 12; h++) {
+      t += '<tr><td>' + hLabels[h] + '</td><td>' + signGlyph(houses[h]) + ' ' + signName(houses[h]) + '</td><td>' + degInSign(houses[h]) + '\u00b0</td></tr>';
+    }
+  } else if (!(_natalCache && _natalCache.hasGeo)) {
+    t += '<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Add birthplace in Step 1 for house cusps</td></tr>';
+  }
+
+  const tradition = (_natalCache && _natalCache.system === 'vedic') ? 'Vedic Sidereal \u00b7 Lahiri Ayanamsa' : 'Western Tropical';
+
+  wrap.innerHTML = '<d'<div class="natal-orrery-container">' + s + '</div>' + t + '<span class="natal-tradition-label">' + tradition + '</span>';
 }
 </script>
 </body>
