@@ -936,15 +936,38 @@ async function triggerNatalCalculation() {
     }
 
     const data = await response.json();
-    // data = { planets: { Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, NorthNode, SouthNode },
-    //          houses:  [H1..H12] (only if birthplace provided) }
+    // New API shape (pyswisseph):
+    // data.planets = { sun: {lon, sign, deg_in_sign, house}, moon: {...}, ... }
+    // data.nodes   = { north: {lon,...}, south: {lon,...} }
+    // data.angles  = { ascendant: {lon,...}, mc: {lon,...} }
+    // data.houses  = { system: "Placidus", cusps: [0, H1, H2, ... H12] }  (13 items, index 0 unused)
 
-    const planets = data.planets;
-    const houses  = data.houses || null;
+    // Normalise into the flat structures renderNatalChart expects
+    const raw = data;
 
-    _natalCache = { planets, houses, hasGeo, system: state.system };
+    // planets: lowercase key → lon value
+    const planets = {};
+    const pmap = { sun:'Sun', moon:'Moon', mercury:'Mercury', venus:'Venus', mars:'Mars', jupiter:'Jupiter', saturn:'Saturn' };
+    for (const [k, v] of Object.entries(pmap)) {
+      if (raw.planets && raw.planets[k] !== undefined) planets[v] = raw.planets[k].lon;
+    }
+    // nodes
+    if (raw.nodes) {
+      planets['NorthNode'] = raw.nodes.north.lon;
+      planets['SouthNode'] = raw.nodes.south.lon;
+    }
+    // angles (for house line rendering)
+    const angles = raw.angles || null;
 
-    renderNatalChart(wrap, 'natal-planets-table', planets, houses);
+    // houses: extract cusps[1..12] as a flat 12-element array
+    let houses = null;
+    if (raw.houses && raw.houses.cusps && raw.houses.cusps.length === 13) {
+      houses = raw.houses.cusps.slice(1);  // drop index 0, gives [H1, H2, ... H12]
+    }
+
+    _natalCache = { planets, houses, angles, hasGeo, system: state.system };
+
+    renderNatalChart(wrap, 'natal-planets-table', planets, houses, angles);
 
     cont.disabled = false;
     btn.textContent = 'Recalculate';
@@ -967,15 +990,20 @@ function renderStoredOrrery(wrapId, tableId) {
     wrap.innerHTML = '<p class="natal-error">Complete Steps 1 and 2 to see your chart here.</p>';
     return;
   }
-  renderNatalChart(wrap, tableId, _natalCache.planets, _natalCache.houses);
+  renderNatalChart(wrap, tableId, _natalCache.planets, _natalCache.houses, _natalCache.angles);
 }
 
 // ── Orrery renderer ─────────────────────────────────────────────────────────
-// Accepts the API response object directly.
-// Key mapping: API returns capitalized keys (Sun, Moon, etc.)
-function renderNatalChart(wrap, tableId, planets, houses) {
+// planets = { Sun: lon, Moon: lon, ..., NorthNode: lon, SouthNode: lon }  (all 0-360 ecliptic)
+// houses  = flat 12-element array [H1_cusp, H2_cusp, ... H12_cusp]  or null
+// angles  = { ascendant: {lon}, mc: {lon} }  or null
+//
+// ORIENTATION: North Node is placed at 12 o'clock (top). Every other longitude
+// is rotated by the same offset so the whole chart rotates consistently.
+// This means the direction the ring points on the finger always aligns with
+// the wearer's North Node — their soul's direction of growth.
+function renderNatalChart(wrap, tableId, planets, houses, angles) {
 
-  // Planets + nodes from the API
   const PLANET_DEFS = [
     { key: 'Moon',      glyph: '\u263d', label: 'Moon',      color: '#d8cfc0', ringR: 0.14 },
     { key: 'Mercury',   glyph: '\u263f', label: 'Mercury',   color: '#c4a05a', ringR: 0.22 },
@@ -990,24 +1018,35 @@ function renderNatalChart(wrap, tableId, planets, houses) {
 
   const SIGNS      = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
   const SIGN_GLYPH = ['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
-  const signName   = lon => SIGNS[Math.floor(lon / 30)];
-  const signGlyph  = lon => SIGN_GLYPH[Math.floor(lon / 30)];
-  const degInSign  = lon => (lon % 30).toFixed(2);
-  const toRad      = d => d * Math.PI / 180;
+  const signName   = lon => SIGNS[Math.floor(((lon % 360) + 360) % 360 / 30)];
+  const signGlyph  = lon => SIGN_GLYPH[Math.floor(((lon % 360) + 360) % 360 / 30)];
+  const degInSign  = lon => (((lon % 360) + 360) % 360 % 30).toFixed(2);
+  const toRad      = d  => d * Math.PI / 180;
 
-  const sz   = Math.min(420, window.innerWidth * 0.90);
-  const cx   = sz / 2, cy = sz / 2;
-  const NS   = 'http://www.w3.org/2000/svg';
-  const ZR   = sz * 0.465;   // zodiac outer radius
-  const ZI   = sz * 0.385;   // zodiac inner radius
-  const FP   = Math.round(sz * 0.065);  // planet glyph size
-  const FS   = Math.round(sz * 0.050);  // sign glyph size
-  const DS   = 8, DM = 6;   // dot sizes: sun, others
+  // ── Rotation offset so North Node sits at noon (270° in SVG = 12 o'clock) ──
+  // SVG angle convention: 0° = 3 o'clock, increases clockwise.
+  // We want North Node at 270° (12 o'clock). So:
+  //   svgAngle = eclipticLon - offset - 90   (the -90 shifts 0° from 3 o'clock to 12 o'clock in standard charts)
+  // We set offset so that northNode - offset - 90 = 270, i.e. offset = northNode - 360.
+  // Simplified: rotOffset = northNode  (we subtract this from every longitude before plotting)
+  // Result: NorthNode plots at eclipticLon - rotOffset = 0°, which maps to 12 o'clock.
+  const northNodeLon = planets['NorthNode'];
+  const rotOffset = (northNodeLon !== undefined) ? northNodeLon : 0;
 
-  // ── SVG ──────────────────────────────────────────────────────────────────
+  // Helper: ecliptic lon → SVG angle in radians, with rotation applied
+  const lonToRad = lon => toRad(((lon - rotOffset) % 360 + 360) % 360 - 90);
+
+  const sz = Math.min(420, window.innerWidth * 0.90);
+  const cx = sz / 2, cy = sz / 2;
+  const NS = 'http://www.w3.org/2000/svg';
+  const ZR = sz * 0.465;
+  const ZI = sz * 0.385;
+  const FP = Math.round(sz * 0.065);
+  const FS = Math.round(sz * 0.050);
+  const DS = 8, DM = 6;
+
   let s = '<svg viewBox="0 0 ' + sz + ' ' + sz + '" xmlns="' + NS + '" style="display:block;width:100%;height:auto;overflow:visible;">';
 
-  // Background gradient
   s += '<defs><radialGradient id="ng' + tableId + '" cx="50%" cy="50%" r="50%">';
   s += '<stop offset="0%" stop-color="rgba(196,160,90,0.08)"/>';
   s += '<stop offset="100%" stop-color="transparent"/>';
@@ -1018,10 +1057,13 @@ function renderNatalChart(wrap, tableId, planets, houses) {
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZR + '" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>';
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + ZI + '" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>';
 
-  // 12 sign dividers + glyphs
+  // 12 sign dividers + glyphs — rotated by same offset
   const SG = ['\u2648','\u2649','\u264a','\u264b','\u264c','\u264d','\u264e','\u264f','\u2650','\u2651','\u2652','\u2653'];
   for (let i = 0; i < 12; i++) {
-    const aS = toRad(i * 30 - 90), aM = toRad(i * 30 + 15 - 90);
+    const signLon  = i * 30;
+    const signLonM = i * 30 + 15;
+    const aS = lonToRad(signLon);
+    const aM = lonToRad(signLonM);
     const x1 = cx + Math.cos(aS)*ZI, y1 = cy + Math.sin(aS)*ZI;
     const x2 = cx + Math.cos(aS)*ZR, y2 = cy + Math.sin(aS)*ZR;
     s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>';
@@ -1029,11 +1071,11 @@ function renderNatalChart(wrap, tableId, planets, houses) {
     s += '<text x="' + (cx+Math.cos(aM)*gr).toFixed(1) + '" y="' + (cy+Math.sin(aM)*gr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="' + FS + '" font-family="serif">' + SG[i] + '</text>';
   }
 
-  // House lines (Placidus cusps) — only if houses provided
+  // House lines (Placidus cusps)
   if (houses && houses.length === 12) {
     const hLabels = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
     for (let h = 0; h < 12; h++) {
-      const a = toRad(houses[h] - 90);
+      const a = lonToRad(houses[h]);
       const isAngle = (h === 0 || h === 3 || h === 6 || h === 9);
       const x1 = cx + Math.cos(a) * ZI * 0.95, y1 = cy + Math.sin(a) * ZI * 0.95;
       const x2 = cx + Math.cos(a) * ZI * 0.12, y2 = cy + Math.sin(a) * ZI * 0.12;
@@ -1041,18 +1083,20 @@ function renderNatalChart(wrap, tableId, planets, houses) {
       s += ' stroke="' + (isAngle ? 'rgba(196,160,90,0.55)' : 'rgba(196,160,90,0.18)') + '"';
       s += ' stroke-width="' + (isAngle ? '1.4' : '0.6') + '"';
       s += ' stroke-dasharray="' + (isAngle ? 'none' : '3,3') + '"/>';
-      // House number in sector midpoint
-      const midA = toRad(houses[h] + 15 - 90);
+      const nextH = houses[(h + 1) % 12];
+      const midLon = houses[h] + (((nextH - houses[h]) + 360) % 360) / 2;
+      const midA = lonToRad(midLon);
       const numR = ZI * 0.70;
-      const FH   = Math.round(sz * 0.028);
+      const FH = Math.round(sz * 0.028);
       s += '<text x="' + (cx + Math.cos(midA) * numR).toFixed(1) + '" y="' + (cy + Math.sin(midA) * numR).toFixed(1) + '"';
       s += ' text-anchor="middle" dominant-baseline="central"';
       s += ' fill="rgba(196,160,90,0.32)" font-size="' + FH + '" font-family="serif">' + hLabels[h] + '</text>';
     }
   }
 
-  // Orbital rings (inner)
+  // Orbital rings (inner) — static, not rotated
   for (const pd of PLANET_DEFS) {
+    if (!pd.ringR) continue;
     const rr = pd.ringR * ZI;
     s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + rr.toFixed(1) + '" fill="none"';
     s += ' stroke="' + (pd.big ? 'rgba(196,160,90,0.40)' : 'rgba(196,160,90,0.14)') + '"';
@@ -1062,25 +1106,28 @@ function renderNatalChart(wrap, tableId, planets, houses) {
 
   // Planet dots on inner orbital rings
   for (const pd of PLANET_DEFS) {
+    if (!pd.ringR) continue;
     const lon = planets[pd.key];
     if (lon === undefined) continue;
     const rr = pd.ringR * ZI;
-    const a = toRad(lon - 90);
+    const a = lonToRad(lon);
     s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.88"/>';
   }
 
-  // Planet glyphs + dots on zodiac ring
-  const PR = ZI - sz * 0.035;  // dot position on zodiac ring
-  const GR = ZI + sz * 0.028;  // glyph position just outside zodiac ring
+  // Planet glyphs + dots on zodiac ring (all planets including nodes)
+  const PR = ZI - sz * 0.035;
+  const GR = ZI + sz * 0.028;
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
-    const a = toRad(lon - 90);
-    // Dot on zodiac ring
+    const a = lonToRad(lon);
     s += '<circle cx="' + (cx+Math.cos(a)*PR).toFixed(1) + '" cy="' + (cy+Math.sin(a)*PR).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.92"/>';
-    // Glyph outside zodiac ring
     s += '<text x="' + (cx+Math.cos(a)*GR).toFixed(1) + '" y="' + (cy+Math.sin(a)*GR).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + FP + '" font-family="serif" opacity="0.95">' + pd.glyph + '</text>';
   }
+
+  // North Node pointer at 12 o'clock
+  s += '<line x1="' + cx + '" y1="' + (cy - ZI * 0.92) + '" x2="' + cx + '" y2="' + (cy - ZI * 1.02) + '" stroke="rgba(232,208,138,0.80)" stroke-width="2.5" stroke-linecap="round"/>';
+  s += '<text x="' + cx + '" y="' + (cy - ZI * 1.13) + '" text-anchor="middle" dominant-baseline="central" fill="rgba(232,208,138,0.70)" font-size="' + Math.round(sz*0.032) + '" font-family="serif">\u260a</text>';
 
   // Earth crosshair at center
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="6" fill="rgba(196,160,90,0.85)"/>';
@@ -1088,9 +1135,9 @@ function renderNatalChart(wrap, tableId, planets, houses) {
   s += '<line x1="' + cx + '" y1="' + (cy-9) + '" x2="' + cx + '" y2="' + (cy+9) + '" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>';
   s += '</svg>';
 
-  // ── Planet table ──────────────────────────────────────────────────────────
+  // ── Planet + house table ──────────────────────────────────────────────────
   let t = '<table id="' + tableId + '"><tbody>';
-  t += '<tr><td colspan="3" class="natal-section-label">Planets &middot; ' + (_natalCache && _natalCache.system === 'vedic' ? 'Vedic Sidereal' : 'Western Tropical') + '</td></tr>';
+  t += '<tr><td colspan="3" class="natal-section-label">Planets \u00b7 ' + (_natalCache && _natalCache.system === 'vedic' ? 'Vedic Sidereal' : 'Western Tropical') + '</td></tr>';
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
@@ -1100,11 +1147,7 @@ function renderNatalChart(wrap, tableId, planets, houses) {
     t += '<td>' + degInSign(lon) + '\u00b0</td>';
     t += '</tr>';
   }
-  t += '</tbody></table>';
 
-  // Nodes rows (already in PLANET_DEFS loop above — handled automatically)
-
-  // House cusps section
   if (houses && houses.length === 12) {
     t += '<tr><td colspan="3" class="natal-section-label">House Cusps \u00b7 Placidus</td></tr>';
     const hLabels = ['I \u2014 Asc','II','III','IV \u2014 IC','V','VI','VII \u2014 Dsc','VIII','IX','X \u2014 MC','XI','XII'];
@@ -1115,9 +1158,11 @@ function renderNatalChart(wrap, tableId, planets, houses) {
     t += '<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Add birthplace in Step 1 for house cusps</td></tr>';
   }
 
+  t += '</tbody></table>';
+
   const tradition = (_natalCache && _natalCache.system === 'vedic') ? 'Vedic Sidereal \u00b7 Lahiri Ayanamsa' : 'Western Tropical';
 
-  wrap.innerHTML = '<d'<div class="natal-orrery-container">' + s + '</div>' + t + '<span class="natal-tradition-label">' + tradition + '</span>';
+  wrap.innerHTML = '<div class="natal-orrery-container">' + s + '</div>' + t + '<span class="natal-tradition-label">' + tradition + '</span>';
 }
 </script>
 </body>
