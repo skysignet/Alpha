@@ -929,7 +929,7 @@ async function triggerNatalCalculation() {
       system: state.system === 'vedic' ? 'vedic' : 'tropical'
     });
 
-    const response = await fetch('/api/calculate?' + params.toString());
+    const response = await fetch('https://alpha-production-1b1b.up.railway.app/api/calculate?' + params.toString());
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.error || 'API error ' + response.status);
