@@ -213,25 +213,3 @@ def calculate_chart(date_str, time_str, lat, lon, system):
             "lon":  lon
         }
     }
-# ── Flask web server entry point ──
-from flask import Flask, request as flask_request, jsonify
-app = Flask(__name__)
-
-@app.route('/api/calculate')
-def calculate_endpoint():
-    class Req:
-        method = flask_request.method
-        args = flask_request.args
-    class Res:
-        headers = {}
-        status_code = 200
-        _body = ''
-        def send(self, body):
-            self._body = body
-            return self._body
-    res = Res()
-    result = handler(Req(), res)
-    return result, res.status_code, {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'}
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
