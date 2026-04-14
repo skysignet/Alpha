@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/calculate.py": {
+      "runtime": "python3.9"
+    }
+  }
+}
