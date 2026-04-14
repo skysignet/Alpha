@@ -194,57 +194,44 @@
   .reveal.animated.visible { opacity:1; transform:translateY(0); }
 
 
-  /* NATAL ORRERY */
-  #natal-orrery-wrap {
-    margin: 2rem auto 1.5rem;
+  /* NATAL ORRERY (Step 2 + Step 7) */
+  #natal-orrery-wrap, #natal-orrery-wrap-review {
+    margin: 2rem auto 0;
     text-align: center;
+    display: none; /* hidden until tradition selected */
   }
+  #natal-orrery-wrap.visible, #natal-orrery-wrap-review.visible { display: block; }
   .orrery-loading {
-    font-family: var(--cinzel);
-    font-size: .58rem;
-    letter-spacing: .3em;
-    color: var(--muted);
-    text-transform: uppercase;
-    padding: 2rem 0;
+    font-family: var(--cinzel); font-size: .58rem; letter-spacing: .3em;
+    color: var(--muted); text-transform: uppercase; padding: 2rem 0;
   }
-  #natal-orrery-container {
-    position: relative;
-    width: min(380px, 88vw);
-    margin: 0 auto;
+  .natal-orrery-container { position: relative; width: min(420px,90vw); margin: 0 auto; }
+  #natal-planets-table, #natal-planets-table-review {
+    width: 100%; max-width: 500px; margin: 1.2rem auto 0; border-collapse: collapse;
   }
-  #natal-planets-table {
-    width: 100%;
-    max-width: 480px;
-    margin: 1.2rem auto 0;
-    border-collapse: collapse;
-  }
-  #natal-planets-table td {
-    padding: .35rem .7rem;
-    font-size: .82rem;
-    color: var(--muted);
+  #natal-planets-table td, #natal-planets-table-review td {
+    padding: .4rem .8rem; font-size: .85rem; color: var(--muted);
     border-bottom: 1px solid rgba(196,160,90,.06);
   }
-  #natal-planets-table td:first-child {
-    font-family: var(--cinzel);
-    font-size: .52rem;
-    letter-spacing: .18em;
-    color: var(--gold);
-    text-transform: uppercase;
-    white-space: nowrap;
+  #natal-planets-table td:first-child, #natal-planets-table-review td:first-child {
+    font-family: var(--cinzel); font-size: .54rem; letter-spacing: .18em;
+    color: var(--gold); text-transform: uppercase; white-space: nowrap;
   }
-  #natal-planets-table td:last-child {
-    font-style: italic;
-    color: var(--text);
-    text-align: right;
+  #natal-planets-table td:last-child, #natal-planets-table-review td:last-child {
+    font-style: italic; color: var(--text); text-align: right;
+  }
+  .natal-section-label {
+    font-family: var(--cinzel); font-size: .52rem; letter-spacing: .22em;
+    color: var(--gold-dim); text-transform: uppercase; padding: .7rem .8rem .2rem;
   }
   .natal-error {
-    font-family: var(--cinzel);
-    font-size: .56rem;
-    letter-spacing: .2em;
-    color: var(--muted);
-    font-style: italic;
-    text-align: center;
-    padding: 1rem 0;
+    font-family: var(--cinzel); font-size: .56rem; letter-spacing: .2em;
+    color: var(--muted); font-style: italic; text-align: center; padding: 1rem 0;
+  }
+  .natal-tradition-label {
+    font-size: .52rem; font-family: var(--cinzel); letter-spacing: .18em;
+    color: var(--muted); text-transform: uppercase; margin-top: 1rem;
+    text-align: center; display: block;
   }
 
   @media(max-width:640px){
@@ -483,7 +470,10 @@
           <button class="toggle-btn" id="btn-vedic" onclick="selectSystem('vedic')">Vedic Sidereal<br><span style="font-size:.8em; font-style:italic; letter-spacing:0; text-transform:none; color:var(--muted);">Stars-based. Lahiri ayanamsa.</span></button>
         </div>
         <p class="finish-note" style="margin-top:1.2rem;">Most Western practitioners use the tropical system. Vedic (Jyotisha) tracks the actual sidereal positions of the constellations, shifting each planet approximately 23 degrees. Both encoded with full precision.</p>
-        <div class="wizard__nav wizard__nav--split">
+        <div id="natal-orrery-wrap">
+          <p class="orrery-loading">✦ &nbsp; Calculating your sky &nbsp; ✦</p>
+        </div>
+        <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
           <button class="btn-nav btn-next" onclick="goStep(3)">Continue</button>
         </div>
@@ -598,7 +588,7 @@
       <div class="wizard__panel" id="step-7">
         <p class="panel-title">Your commission</p>
         <p class="panel-subtitle">Review before proceeding to payment.</p>
-        <div id="natal-orrery-wrap"><p class="orrery-loading">✦ &nbsp; Your sky will appear here &nbsp; ✦</p></div>
+        <div id="natal-orrery-wrap-review"><p class="orrery-loading">✦ &nbsp; Your sky &nbsp; ✦</p></div>
         <div class="unique-note">✦ This ring will be made once, for you alone. The planetary configuration it encodes will not recur in any human lifetime. There is no other ring like this one.</div>
         <div class="summary-block" id="order-summary">
           <div class="summary-row"><span class="summary-key">Birth</span><span class="summary-val" id="sum-birth">—</span></div>
@@ -772,6 +762,8 @@ function selectSystem(s){
   state.system=s;
   document.getElementById('btn-western').classList.toggle('selected',s==='western');
   document.getElementById('btn-vedic').classList.toggle('selected',s==='vedic');
+  // Trigger natal chart as soon as tradition is confirmed
+  buildNatalOrrery();
 }
 
 const metalIds=['silver','silver-pd','gold14','gold18','platinum'];
@@ -827,243 +819,182 @@ function buildSummary(){
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra;
   document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
-
-  // Trigger natal orrery calculation
-  buildNatalOrrery();
+  // Re-render review orrery when they reach step 7
+  renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
 function proceedToCheckout(){
-  const total = state.metalPrice + state.bandExtra;
   if(!state.metal){ alert('Please select a metal in Step 3.'); return; }
   if(!state.finish){ alert('Please select a finish in Step 4.'); return; }
   if(!state.band){ alert('Please select a band in Step 5.'); return; }
-  // Stripe stub
   alert('Stripe integration coming soon. Your commission details have been recorded.');
 }
 
+// ═══════════════════════════════════════════════════════════════
+// NATAL CHART ENGINE — VSOP87 + Placidus houses + Lunar Nodes
+// ═══════════════════════════════════════════════════════════════
 
-// ============================================================
-// NATAL CHART ENGINE
-// Accurate planetary positions using simplified VSOP87
-// ============================================================
+function toRad(d){ return d*Math.PI/180; }
+function toDeg(r){ return r*180/Math.PI; }
+function norm360(a){ return ((a%360)+360)%360; }
 
-// Convert degrees to radians
-function toRad(d){ return d * Math.PI / 180; }
-// Convert radians to degrees
-function toDeg(r){ return r * 180 / Math.PI; }
-// Normalize angle to [0, 360)
-function norm360(a){ return ((a % 360) + 360) % 360; }
-
-// Julian Day Number from UTC date/time
-function julianDay(year, month, day, hour, min, sec){
-  if(month <= 2){ year--; month += 12; }
-  const A = Math.floor(year/100);
-  const B = 2 - A + Math.floor(A/4);
-  const JD = Math.floor(365.25*(year+4716)) + Math.floor(30.6001*(month+1)) + day + B - 1524.5;
-  return JD + (hour + min/60 + sec/3600)/24;
+function julianDay(yr,mo,dy,hr,mn,sc){
+  if(mo<=2){yr--;mo+=12;}
+  const A=Math.floor(yr/100), B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(yr+4716))+Math.floor(30.6001*(mo+1))+dy+B-1524.5+(hr+mn/60+sc/3600)/24;
 }
+function jc(jd){ return (jd-2451545.0)/36525.0; }
 
-// Julian centuries from J2000.0
-function jc(jd){ return (jd - 2451545.0) / 36525.0; }
-
-// ---- Sun (ecliptic longitude, geometric) ----
 function sunLon(T){
-  const L0 = norm360(280.46646 + 36000.76983*T + 0.0003032*T*T);
-  const M  = norm360(357.52911 + 35999.05029*T - 0.0001537*T*T);
-  const Mr = toRad(M);
-  const C  = (1.914602 - 0.004817*T - 0.000014*T*T)*Math.sin(Mr)
-           + (0.019993 - 0.000101*T)*Math.sin(2*Mr)
-           +  0.000289*Math.sin(3*Mr);
-  return norm360(L0 + C);
+  const L0=norm360(280.46646+36000.76983*T+0.0003032*T*T);
+  const M=norm360(357.52911+35999.05029*T-0.0001537*T*T);
+  const Mr=toRad(M);
+  const C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(Mr)
+          +(0.019993-0.000101*T)*Math.sin(2*Mr)+0.000289*Math.sin(3*Mr);
+  return norm360(L0+C);
 }
 
-// ---- Moon (simplified, ~1 degree accuracy) ----
 function moonLon(T){
-  const L1 = norm360(218.3165 + 481267.8813*T);
-  const D  = norm360(297.8502 + 445267.1115*T);
-  const M  = norm360(357.5291 +  35999.0503*T);
-  const Mp = norm360(134.9634 + 477198.8676*T);
-  const F  = norm360( 93.2721 + 483202.0175*T);
-  const Lr = toRad(L1), Dr=toRad(D), Mr=toRad(M), Mpr=toRad(Mp), Fr=toRad(F);
-  let lon = L1;
-  lon += 6.2888*Math.sin(Mpr);
-  lon += 1.2740*Math.sin(2*Dr - Mpr);
-  lon += 0.6583*Math.sin(2*Dr);
-  lon += 0.2136*Math.sin(2*Mpr);
-  lon -= 0.1851*Math.sin(Mr);
-  lon -= 0.1143*Math.sin(2*Fr);
-  lon += 0.0588*Math.sin(2*Dr - 2*Mpr);
-  lon += 0.0572*Math.sin(2*Dr - Mr - Mpr);
-  lon += 0.0533*Math.sin(2*Dr + Mpr);
-  lon += 0.0458*Math.sin(2*Dr - Mr);
-  lon += 0.0409*Math.sin(2*Mpr - Mr);
+  const L1=norm360(218.3165+481267.8813*T);
+  const D=norm360(297.8502+445267.1115*T);
+  const M=norm360(357.5291+35999.0503*T);
+  const Mp=norm360(134.9634+477198.8676*T);
+  const F=norm360(93.2721+483202.0175*T);
+  const Dr=toRad(D),Mr=toRad(M),Mpr=toRad(Mp),Fr=toRad(F);
+  let lon=L1;
+  lon+=6.2888*Math.sin(Mpr); lon+=1.2740*Math.sin(2*Dr-Mpr);
+  lon+=0.6583*Math.sin(2*Dr); lon+=0.2136*Math.sin(2*Mpr);
+  lon-=0.1851*Math.sin(Mr); lon-=0.1143*Math.sin(2*Fr);
+  lon+=0.0588*Math.sin(2*Dr-2*Mpr); lon+=0.0572*Math.sin(2*Dr-Mr-Mpr);
+  lon+=0.0533*Math.sin(2*Dr+Mpr); lon+=0.0458*Math.sin(2*Dr-Mr);
   return norm360(lon);
 }
 
-// ---- Generic planet from orbital elements ----
-// Returns heliocentric ecliptic longitude
-function planetLon(T, a0,a1, e0,e1, i0,i1, L0,L1, lp0,lp1, O0,O1){
-  const a  = a0 + a1*T;
-  const e  = e0 + e1*T;
-  const i  = toRad(i0 + i1*T);
-  const L  = norm360(L0 + L1*T);
-  const lp = norm360(lp0 + lp1*T);
-  const O  = norm360(O0 + O1*T);
-  const w  = norm360(lp - O);
-  const M  = norm360(L - lp);
-  const Mr = toRad(M);
-  // Solve Kepler's equation iteratively
-  let E = Mr;
-  for(let k=0;k<10;k++) E = Mr + e*Math.sin(E);
-  const v = 2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2), Math.sqrt(1-e)*Math.cos(E/2));
-  const wr = toRad(w);
-  const Or = toRad(O);
-  // Heliocentric ecliptic coords
-  const xh = a*(Math.cos(E) - e);
-  const yh = a*Math.sqrt(1-e*e)*Math.sin(E);
-  // longitude
-  const theta = toDeg(Math.atan2(yh,xh));
-  return norm360(theta + w + O);
+function lunarNodes(T){
+  const Omega=norm360(125.04452-1934.136261*T+0.0020708*T*T);
+  return {north:Omega, south:norm360(Omega+180)};
 }
 
-// Convert heliocentric to geocentric longitude (simple approximation)
-// We use Earth's heliocentric lon and do a vector subtraction in 2D ecliptic
-function helio2geo(T, phLon, phDist, earthLon){
-  const phR = toRad(phLon);
-  const eR  = toRad(earthLon);
-  const xh = phDist * Math.cos(phR);
-  const yh = phDist * Math.sin(phR);
-  // Earth distance ~1 AU simplified
-  const xe = Math.cos(eR);
-  const ye = Math.sin(eR);
-  return norm360(toDeg(Math.atan2(yh - ye, xh - xe)) + 180);
+function solveKepler(M,e){ let E=M; for(let k=0;k<10;k++) E=M+e*Math.sin(E); return E; }
+
+function planetHelio(T,a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1){
+  const a=a0+a1*T, e=e0+e1*T;
+  const lp=norm360(lp0+lp1*T), O=norm360(O0+O1*T), w=norm360(lp-O);
+  const L=norm360(L0+L1*T), M=toRad(norm360(L-lp));
+  const E=solveKepler(M,e);
+  const xh=a*(Math.cos(E)-e), yh=a*Math.sqrt(1-e*e)*Math.sin(E);
+  const dist=Math.sqrt(xh*xh+yh*yh);
+  const theta=norm360(toDeg(Math.atan2(yh,xh))+w+O);
+  return {lon:theta,dist:dist};
 }
 
-// Full planetary distance (AU, from Keplerian elements)
-function planetDist(T, a0,a1, e0,e1, L0,L1, lp0,lp1){
-  const a  = a0 + a1*T;
-  const e  = e0 + e1*T;
-  const lp = norm360(lp0 + lp1*T);
-  const L  = norm360(L0 + L1*T);
-  const M  = toRad(norm360(L - lp));
-  let E = M;
-  for(let k=0;k<10;k++) E = M + e*Math.sin(E);
-  return a*(1 - e*Math.cos(E));
+function helio2geo(phLon,phDist,earthLon){
+  const phR=toRad(phLon), eR=toRad(earthLon);
+  const xh=phDist*Math.cos(phR), yh=phDist*Math.sin(phR);
+  return norm360(toDeg(Math.atan2(yh-Math.sin(eR), xh-Math.cos(eR)))+180);
 }
 
-// Compute all planet geocentric ecliptic longitudes
 function computePlanets(jd){
-  const T = jc(jd);
-  // Sun
-  const sunL = sunLon(T);
-  const earthL = norm360(sunL + 180); // Earth helio lon
-  // Moon
-  const moonL = moonLon(T);
-  // Mercury orbital elements (simplified mean elements)
-  const merL = helio2geo(T,
-    planetLon(T, 0.38709927,0.00000037, 0.20563593,0.00001906, 7.00497902,-0.00594749, 252.25032350,149472.67411175, 77.45779628,0.16047689, 48.33076593,-0.12534081),
-    planetDist(T, 0.38709927,0.00000037, 0.20563593,0.00001906, 252.25032350,149472.67411175, 77.45779628,0.16047689),
-    earthL
-  );
-  // Venus
-  const venL = helio2geo(T,
-    planetLon(T, 0.72333566,0.00000390, 0.00677672,-0.00004107, 3.39467605,-0.00078890, 181.97909950,58517.81538729, 131.60246718,0.00268329, 76.67984255,-0.27769418),
-    planetDist(T, 0.72333566,0.00000390, 0.00677672,-0.00004107, 181.97909950,58517.81538729, 131.60246718,0.00268329),
-    earthL
-  );
-  // Mars
-  const marL = helio2geo(T,
-    planetLon(T, 1.52371034,0.00001847, 0.09339410,0.00007882, 1.84969142,-0.00813131, 355.45332067,19140.30268499, 336.06023029,0.44390164, 49.55953891,-0.29257343),
-    planetDist(T, 1.52371034,0.00001847, 0.09339410,0.00007882, 355.45332067,19140.30268499, 336.06023029,0.44390164),
-    earthL
-  );
-  // Jupiter
-  const jupL = helio2geo(T,
-    planetLon(T, 5.20288700,-0.00011607, 0.04838624,-0.00013253, 1.30439695,-0.00183714, 34.39644051,3034.74612775, 14.72847983,0.21252668, 100.47390909,0.20469106),
-    planetDist(T, 5.20288700,-0.00011607, 0.04838624,-0.00013253, 34.39644051,3034.74612775, 14.72847983,0.21252668),
-    earthL
-  );
-  // Saturn
-  const satL = helio2geo(T,
-    planetLon(T, 9.53667594,-0.00125060, 0.05386179,-0.00050991, 2.48599187,0.00193609, 49.95424423,1222.49362201, 92.59887831,-0.41897216, 113.66242448,-0.28867794),
-    planetDist(T, 9.53667594,-0.00125060, 0.05386179,-0.00050991, 49.95424423,1222.49362201, 92.59887831,-0.41897216),
-    earthL
-  );
-  // Uranus
-  const uraL = helio2geo(T,
-    planetLon(T, 19.18916464,-0.00196176, 0.04725744,-0.00004397, 0.77263783,-0.00242939, 313.23810451,428.48202785, 170.95427630,0.40805281, 74.01692503,0.04240589),
-    planetDist(T, 19.18916464,-0.00196176, 0.04725744,-0.00004397, 313.23810451,428.48202785, 170.95427630,0.40805281),
-    earthL
-  );
-  // Neptune
-  const nepL = helio2geo(T,
-    planetLon(T, 30.06992276,0.00026291, 0.00859048,0.00005105, 1.77004347,0.00035372, 304.87997031,218.45945325, 44.96476227,-0.32241464, 131.78422574,-0.00508664),
-    planetDist(T, 30.06992276,0.00026291, 0.00859048,0.00005105, 304.87997031,218.45945325, 44.96476227,-0.32241464),
-    earthL
-  );
-  // Pluto (simplified mean motion)
-  const plutoM = norm360(238.9508 + 0.003976*((jd - 2451545)/365.25)*360/248);
-  const plutoL = norm360(plutoM + 103.4); // rough argument of perihelion
-
-  return { sun:sunL, moon:moonL, mercury:merL, venus:venL, mars:marL, jupiter:jupL, saturn:satL, uranus:uraL, neptune:nepL, pluto:plutoL };
+  const T=jc(jd);
+  const sunL=sunLon(T), earthL=norm360(sunL+180);
+  const moonL=moonLon(T), nodes=lunarNodes(T);
+  function p(a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1){
+    const h=planetHelio(T,a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1);
+    return helio2geo(h.lon,h.dist,earthL);
+  }
+  return {
+    sun:sunL, moon:moonL,
+    mercury:p(0.38709927,0.00000037,0.20563593,0.00001906,7.00497902,-0.00594749,252.25032350,149472.67411175,77.45779628,0.16047689,48.33076593,-0.12534081),
+    venus:  p(0.72333566,0.00000390,0.00677672,-0.00004107,3.39467605,-0.00078890,181.97909950,58517.81538729,131.60246718,0.00268329,76.67984255,-0.27769418),
+    mars:   p(1.52371034,0.00001847,0.09339410,0.00007882,1.84969142,-0.00813131,355.45332067,19140.30268499,336.06023029,0.44390164,49.55953891,-0.29257343),
+    jupiter:p(5.20288700,-0.00011607,0.04838624,-0.00013253,1.30439695,-0.00183714,34.39644051,3034.74612775,14.72847983,0.21252668,100.47390909,0.20469106),
+    saturn: p(9.53667594,-0.00125060,0.05386179,-0.00050991,2.48599187,0.00193609,49.95424423,1222.49362201,92.59887831,-0.41897216,113.66242448,-0.28867794),
+    uranus: p(19.18916464,-0.00196176,0.04725744,-0.00004397,0.77263783,-0.00242939,313.23810451,428.48202785,170.95427630,0.40805281,74.01692503,0.04240589),
+    neptune:p(30.06992276,0.00026291,0.00859048,0.00005105,1.77004347,0.00035372,304.87997031,218.45945325,44.96476227,-0.32241464,131.78422574,-0.00508664),
+    northNode:nodes.north, southNode:nodes.south,
+  };
 }
 
-// Apply Lahiri ayanamsa for Vedic (sidereal)
-function applyAyanamsa(lon, jd){
-  const T = (jd - 2451545.0)/36525.0;
-  const ayanamsa = 23.85 + (jd - 2451545.0) * (1/365.25/72.0); // ~50.3" per year
-  return norm360(lon - ayanamsa);
+function obliquity(T){ return 23.439291111-0.013004167*T-0.000000164*T*T+0.000000504*T*T*T; }
+
+function localSiderealTime(jd,lonDeg){
+  const T=jc(jd);
+  const GMST=norm360(280.46061837+360.98564736629*(jd-2451545)+0.000387933*T*T-T*T*T/38710000);
+  return norm360(GMST+lonDeg);
 }
 
-// Sign name from ecliptic longitude
-const SIGNS = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
-const SIGN_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+function placidusHouses(jd,latDeg,lonDeg){
+  const T=jc(jd);
+  const eps=toRad(obliquity(T));
+  const RAMC=toRad(localSiderealTime(jd,lonDeg));
+  const lat=toRad(latDeg);
+  const MCra=Math.atan2(Math.tan(RAMC),Math.cos(eps));
+  let MC=norm360(toDeg(MCra));
+  if(Math.cos(RAMC)<0) MC=norm360(MC+180);
+  const Asc=norm360(toDeg(Math.atan2(Math.cos(RAMC),-Math.sin(RAMC)*Math.cos(eps)-Math.tan(lat)*Math.sin(eps)))+180);
+  function placInt(n,ramc){
+    let theta=ramc+toRad(n*30);
+    for(let i=0;i<20;i++){
+      const dec=Math.asin(Math.sin(eps)*Math.sin(theta));
+      const ad=Math.asin(Math.tan(lat)*Math.tan(dec));
+      const nt=ramc+ad+toRad(n*30);
+      if(Math.abs(nt-theta)<0.00001) break;
+      theta=nt;
+    }
+    const dec=Math.asin(Math.sin(eps)*Math.sin(theta));
+    return norm360(toDeg(Math.atan2(Math.tan(dec)/Math.cos(lat+0.0001),Math.cos(theta))));
+  }
+  const H11=placInt(1,RAMC), H12=placInt(2,RAMC);
+  const H2=placInt(1,RAMC+Math.PI), H3=placInt(2,RAMC+Math.PI);
+  return [Asc,H2,H3,norm360(MC+180),norm360(H3+180),norm360(H2+180),
+          norm360(Asc+180),norm360(H2+180),norm360(H11+180),MC,H11,H12];
+}
+
+function lahiriAyanamsa(jd){ return 23.85+(jd-2451545.0)*(1/365.25/72.0); }
+
+const SIGNS=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const SIGN_GLYPHS=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
 function signOf(lon){ return SIGNS[Math.floor(lon/30)]; }
-function degInSign(lon){ return (lon % 30).toFixed(1); }
 function signGlyph(lon){ return SIGN_GLYPHS[Math.floor(lon/30)]; }
+function degInSign(lon){ return (lon%30).toFixed(1); }
 
-// Geocode via Nominatim
 async function geocodePlace(place){
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json&limit=1`;
-  const resp = await fetch(url, {headers:{'User-Agent':'SkySignetApp/1.0'}});
-  const data = await resp.json();
-  if(!data || !data.length) return null;
-  return {lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), displayName: data[0].display_name};
+  const url=`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(place)}&format=json&limit=1`;
+  const resp=await fetch(url,{headers:{'User-Agent':'SkySignetApp/1.0'}});
+  const data=await resp.json();
+  if(!data||!data.length) return null;
+  return {lat:parseFloat(data[0].lat),lon:parseFloat(data[0].lon)};
 }
 
-// Timezone offset via timeapi.io (free, no key)
-async function getTimezoneOffset(lat, lon, dateStr){
-  try {
-    const url = `https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-    // We need offset for the specific date (DST-aware)
-    const dtUrl = `https://timeapi.io/api/Conversion/ConvertTimeZone`;
-    // Actually use the simpler offset approach
-    const tzName = data.timeZone;
-    // Use Intl to get offset for the birth date
-    const dateObj = new Date(dateStr + 'T12:00:00');
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: tzName,
-      timeZoneName: 'shortOffset'
-    });
-    const parts = formatter.formatToParts(dateObj);
-    const tzPart = parts.find(p => p.type === 'timeZoneName');
+async function getTZOffset(lat,lon,dateStr){
+  try{
+    const url=`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`;
+    const resp=await fetch(url);
+    const data=await resp.json();
+    const tzName=data.timeZone;
+    const dateObj=new Date(dateStr+'T12:00:00');
+    const fmt=new Intl.DateTimeFormat('en-US',{timeZone:tzName,timeZoneName:'shortOffset'});
+    const parts=fmt.formatToParts(dateObj);
+    const tzPart=parts.find(p=>p.type==='timeZoneName');
     if(tzPart){
-      const match = tzPart.value.match(/GMT([+-]\d+(?::\d+)?)/);
-      if(match){
-        const [h,m] = (match[1]+':00').split(':').map(Number);
-        return h + (m||0)/60;
-      }
+      const m=tzPart.value.match(/GMT([+-]\d+(?::\d+)?)/);
+      if(m){ const [h,mn]=(m[1]+':00').split(':').map(Number); return h+(mn||0)/60; }
     }
     return 0;
-  } catch(e){ return 0; }
+  }catch(e){ return 0; }
 }
 
-// Build the natal orrery in step-7
+// Stored computed data so Step 7 can re-render without re-fetching
+let _natalCache = null;
+
 async function buildNatalOrrery(){
-  const wrap = document.getElementById('natal-orrery-wrap');
+  const wrapId = 'natal-orrery-wrap';
+  const tableId = 'natal-planets-table';
+  const wrap = document.getElementById(wrapId);
   if(!wrap) return;
+
+  // Show the wrap
+  wrap.classList.add('visible');
   wrap.innerHTML = '<p class="orrery-loading">✦ &nbsp; Calculating your sky &nbsp; ✦</p>';
 
   const bd = document.getElementById('birthdate').value;
@@ -1071,147 +1002,185 @@ async function buildNatalOrrery(){
   const bp = document.getElementById('birthplace').value;
 
   if(!bd){
-    wrap.innerHTML = '<p class="natal-error">Enter your birth date in Step 1 to see your sky.</p>';
+    wrap.innerHTML = '<p class="natal-error">Enter your birth date and place in Step 1 first.</p>';
     return;
   }
 
-  try {
-    // Parse date/time
+  try{
     const [yr,mo,dy] = bd.split('-').map(Number);
     const [hr,mn] = bt.split(':').map(Number);
-    let utcOffset = 0;
+    let utcOffset=0, geoLat=0, geoLon=0, hasGeo=false;
 
-    // Geocode if place provided
     if(bp && bp.trim().length > 1){
-      try {
+      try{
         const geo = await geocodePlace(bp);
-        if(geo) utcOffset = await getTimezoneOffset(geo.lat, geo.lon, bd);
-      } catch(e){ /* fall back to UTC */ }
+        if(geo){ geoLat=geo.lat; geoLon=geo.lon; hasGeo=true; utcOffset=await getTZOffset(geoLat,geoLon,bd); }
+      }catch(e){}
     }
 
-    // Build UTC time
     const utcHr = hr - utcOffset;
-    const jd = julianDay(yr, mo, dy, utcHr, mn, 0);
-
-    // Compute planets
+    const jd = julianDay(yr,mo,dy,utcHr,mn,0);
     let positions = computePlanets(jd);
+    let houses = null;
 
-    // Apply Vedic offset if needed
+    if(hasGeo){ try{ houses = placidusHouses(jd,geoLat,geoLon); }catch(e){} }
+
     if(state.system === 'vedic'){
-      const ayan = 23.85 + (jd - 2451545.0) * (1/365.25/72.0);
-      for(const k in positions) positions[k] = norm360(positions[k] - ayan);
+      const ayan = lahiriAyanamsa(jd);
+      for(const k in positions) positions[k] = norm360(positions[k]-ayan);
+      if(houses) houses = houses.map(h=>norm360(h-ayan));
     }
 
-    // Render
-    renderNatalOrrery(wrap, positions);
-  } catch(e){
+    // Cache for step-7 re-render
+    _natalCache = {positions, houses, hasGeo};
+
+    renderNatalChart(wrap, tableId, positions, houses, hasGeo);
+
+  }catch(e){
+    console.error(e);
     wrap.innerHTML = '<p class="natal-error">Could not calculate positions. Please check your birth data.</p>';
   }
 }
 
-function renderNatalOrrery(wrap, pos){
-  const planetDefs = [
-    {key:'moon',    glyph:'☽', label:'Moon',    color:'#d8cfc0', ringR:0.14},
-    {key:'mercury', glyph:'☿', label:'Mercury', color:'#c4a05a', ringR:0.22},
-    {key:'venus',   glyph:'♀', label:'Venus',   color:'#e8d08a', ringR:0.30},
-    {key:'sun',     glyph:'☉', label:'Sun',     color:'#f0e8d5', ringR:0.39},
-    {key:'mars',    glyph:'♂', label:'Mars',    color:'#c4705a', ringR:0.47},
-    {key:'jupiter', glyph:'♃', label:'Jupiter', color:'#c4a05a', ringR:0.55},
-    {key:'saturn',  glyph:'♄', label:'Saturn',  color:'#7a7468', ringR:0.63},
-    {key:'uranus',  glyph:'⛢', label:'Uranus',  color:'#6ab0c8', ringR:0.70},
-    {key:'neptune', glyph:'♆', label:'Neptune', color:'#5a7ac4', ringR:0.77},
-  ];
-
-  const size = Math.min(380, window.innerWidth * 0.88);
-  const cx = size/2, cy = size/2;
-  const svgNS = 'http://www.w3.org/2000/svg';
-
-  // Create outer zodiac + inner orbital orrery
-  let svgHTML = `<svg viewBox="0 0 ${size} ${size}" xmlns="${svgNS}" style="display:block;width:100%;height:auto;overflow:visible;">`;
-  svgHTML += `<defs><radialGradient id="nbg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(196,160,90,0.07)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>`;
-  svgHTML += `<circle cx="${cx}" cy="${cy}" r="${cx}" fill="url(#nbg)"/>`;
-
-  // Zodiac outer ring
-  const zodR = size * 0.47;
-  const zodInnerR = size * 0.40;
-  svgHTML += `<circle cx="${cx}" cy="${cy}" r="${zodR}" fill="none" stroke="rgba(196,160,90,0.25)" stroke-width="1"/>`;
-  svgHTML += `<circle cx="${cx}" cy="${cy}" r="${zodInnerR}" fill="none" stroke="rgba(196,160,90,0.15)" stroke-width="0.5"/>`;
-
-  // 12 sign dividers + labels
-  const sigGlyphs = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
-  const sigNames = ['Ari','Tau','Gem','Can','Leo','Vir','Lib','Sco','Sag','Cap','Aqu','Pis'];
-  for(let s=0; s<12; s++){
-    const aStart = ((s*30) - 90) * Math.PI/180;
-    const aMid   = ((s*30 + 15) - 90) * Math.PI/180;
-    // Divider line
-    const x1 = cx + Math.cos(aStart)*zodInnerR;
-    const y1 = cy + Math.sin(aStart)*zodInnerR;
-    const x2 = cx + Math.cos(aStart)*zodR;
-    const y2 = cy + Math.sin(aStart)*zodR;
-    svgHTML += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(196,160,90,0.2)" stroke-width="0.5"/>`;
-    // Glyph in sector
-    const glR = (zodR + zodInnerR)/2;
-    const gx = cx + Math.cos(aMid)*glR;
-    const gy = cy + Math.sin(aMid)*glR;
-    svgHTML += `<text x="${gx}" y="${gy}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.45)" font-size="${size*0.022}">${sigGlyphs[s]}</text>`;
+// Re-render from cache (used by step-7)
+function renderStoredOrrery(wrapId, tableId){
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return;
+  wrap.classList.add('visible');
+  if(!_natalCache){
+    wrap.innerHTML = '<p class="natal-error">Complete Steps 1 and 2 to see your chart here.</p>';
+    return;
   }
-
-  // Planet dots on zodiac ring (outer)
-  const PLANET_ZODIAC_R = zodInnerR - size*0.025;
-  for(const pd of planetDefs){
-    const lon = pos[pd.key];
-    if(lon === undefined) continue;
-    const a = (lon - 90) * Math.PI/180;
-    const px = cx + Math.cos(a)*PLANET_ZODIAC_R;
-    const py = cy + Math.sin(a)*PLANET_ZODIAC_R;
-    svgHTML += `<circle cx="${px}" cy="${py}" r="${pd.key==='sun'?5:3.5}" fill="${pd.color}" opacity="0.9"/>`;
-    svgHTML += `<text x="${px+6}" y="${py-4}" fill="${pd.color}" font-size="${size*0.028}" opacity="0.8">${pd.glyph}</text>`;
-  }
-
-  // Inner orbital rings
-  for(let i=0; i<planetDefs.length; i++){
-    const pd = planetDefs[i];
-    const rr = pd.ringR * zodInnerR;
-    svgHTML += `<circle cx="${cx}" cy="${cy}" r="${rr}" fill="none" stroke="${i===3?'rgba(196,160,90,0.35)':'rgba(196,160,90,0.12)'}" stroke-width="${i===3?'1':'0.6'}" stroke-dasharray="${i===3?'none':'2,4'}"/>`;
-    // Dot on inner ring
-    const lon = pos[pd.key];
-    if(lon === undefined) continue;
-    const a = (lon - 90) * Math.PI/180;
-    const px = cx + Math.cos(a)*rr;
-    const py = cy + Math.sin(a)*rr;
-    const dotR = pd.key==='sun'?5:(pd.key==='moon'?4:3);
-    svgHTML += `<circle cx="${px}" cy="${py}" r="${dotR}" fill="${pd.color}" opacity="0.85"/>`;
-  }
-
-  // Earth at center
-  svgHTML += `<circle cx="${cx}" cy="${cy}" r="5" fill="rgba(196,160,90,0.8)"/>`;
-  svgHTML += `<line x1="${cx-8}" y1="${cy}" x2="${cx+8}" y2="${cy}" stroke="rgba(8,9,12,0.85)" stroke-width="1.5"/>`;
-  svgHTML += `<line x1="${cx}" y1="${cy-8}" x2="${cx}" y2="${cy+8}" stroke="rgba(8,9,12,0.85)" stroke-width="1.5"/>`;
-
-  svgHTML += '</svg>';
-
-  // Planet positions table
-  let tableHTML = '<table id="natal-planets-table"><tbody>';
-  for(const pd of planetDefs){
-    const lon = pos[pd.key];
-    if(lon === undefined) continue;
-    const deg = degInSign(lon);
-    const sign = signOf(lon);
-    const sg = signGlyph(lon);
-    tableHTML += `<tr><td>${pd.glyph} ${pd.label}</td><td>${sg} ${sign}</td><td>${deg}°</td></tr>`;
-  }
-  tableHTML += '</tbody></table>';
-
-  wrap.innerHTML = `
-    <div id="natal-orrery-container">${svgHTML}</div>
-    ${tableHTML}
-    <p style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-top:1rem;text-align:center;">
-      ${state.system==='vedic'?'Vedic Sidereal · Lahiri Ayanamsa':'Western Tropical'}
-    </p>
-  `;
+  renderNatalChart(wrap, tableId, _natalCache.positions, _natalCache.houses, _natalCache.hasGeo);
 }
 
+// Core renderer — shared between Step 2 and Step 7
+function renderNatalChart(wrap, tableId, pos, houses, hasGeo){
+  const planetDefs=[
+    {key:'sun',      glyph:'☉', label:'Sun',      color:'#f0e8d5', ringR:0.39, big:true},
+    {key:'moon',     glyph:'☽', label:'Moon',     color:'#d8cfc0', ringR:0.14},
+    {key:'mercury',  glyph:'☿', label:'Mercury',  color:'#c4a05a', ringR:0.22},
+    {key:'venus',    glyph:'♀', label:'Venus',    color:'#e8d08a', ringR:0.30},
+    {key:'mars',     glyph:'♂', label:'Mars',     color:'#c4705a', ringR:0.47},
+    {key:'jupiter',  glyph:'♃', label:'Jupiter',  color:'#c4a05a', ringR:0.55},
+    {key:'saturn',   glyph:'♄', label:'Saturn',   color:'#7a7468', ringR:0.63},
+    {key:'uranus',   glyph:'⛢', label:'Uranus',   color:'#6ab0c8', ringR:0.70},
+    {key:'neptune',  glyph:'♆', label:'Neptune',  color:'#5a7ac4', ringR:0.77},
+    {key:'northNode',glyph:'☊', label:'N. Node',  color:'#e8d08a', ringR:null},
+    {key:'southNode',glyph:'☋', label:'S. Node',  color:'#7a7468', ringR:null},
+  ];
 
+  const size = Math.min(420, window.innerWidth * 0.90);
+  const cx=size/2, cy=size/2;
+  const svgNS='http://www.w3.org/2000/svg';
+  const ZODIAC_R      = size*0.465;
+  const ZODIAC_INNER_R= size*0.385;
+  const FONT_PLANET   = Math.round(size*0.065);
+  const FONT_SIGN     = Math.round(size*0.050);
+  const FONT_HOUSE    = Math.round(size*0.030);
+  const DOT_SUN=8, DOT_MAJOR=6, DOT_MINOR=5;
+
+  let svg = `<svg viewBox="0 0 ${size} ${size}" xmlns="${svgNS}" style="display:block;width:100%;height:auto;overflow:visible;">`;
+  svg += `<defs><radialGradient id="nbg${tableId}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(196,160,90,0.08)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${cx}" fill="url(#nbg${tableId})"/>`;
+
+  // Zodiac band
+  svg += `<circle cx="${cx}" cy="${cy}" r="${ZODIAC_R}" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${ZODIAC_INNER_R}" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>`;
+
+  // Sign dividers + glyphs
+  const sigGlyphs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+  for(let s=0;s<12;s++){
+    const aS=toRad(s*30-90), aM=toRad(s*30+15-90);
+    const x1=cx+Math.cos(aS)*ZODIAC_INNER_R, y1=cy+Math.sin(aS)*ZODIAC_INNER_R;
+    const x2=cx+Math.cos(aS)*ZODIAC_R,       y2=cy+Math.sin(aS)*ZODIAC_R;
+    svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>`;
+    const glR=(ZODIAC_R+ZODIAC_INNER_R)/2;
+    svg += `<text x="${(cx+Math.cos(aM)*glR).toFixed(1)}" y="${(cy+Math.sin(aM)*glR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="${FONT_SIGN}" font-family="serif">${sigGlyphs[s]}</text>`;
+  }
+
+  // House lines (if Placidus available)
+  if(houses){
+    const hLabels=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+    for(let h=0;h<12;h++){
+      const a=toRad(houses[h]-90);
+      const isAngle=(h===0||h===3||h===6||h===9);
+      const x1=cx+Math.cos(a)*ZODIAC_INNER_R*0.95, y1=cy+Math.sin(a)*ZODIAC_INNER_R*0.95;
+      const x2=cx+Math.cos(a)*ZODIAC_INNER_R*0.12, y2=cy+Math.sin(a)*ZODIAC_INNER_R*0.12;
+      svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${isAngle?'rgba(196,160,90,0.55)':'rgba(196,160,90,0.18)'}" stroke-width="${isAngle?1.4:0.6}" stroke-dasharray="${isAngle?'none':'3,3'}"/>`;
+      const midA=toRad(houses[h]+15-90), numR=ZODIAC_INNER_R*0.72;
+      svg += `<text x="${(cx+Math.cos(midA)*numR).toFixed(1)}" y="${(cy+Math.sin(midA)*numR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.35)" font-size="${FONT_HOUSE}" font-family="'Cinzel','Palatino Linotype',serif">${hLabels[h]}</text>`;
+    }
+  }
+
+  // Orbital rings
+  for(const pd of planetDefs){
+    if(pd.ringR===null) continue;
+    const rr=pd.ringR*ZODIAC_INNER_R;
+    svg += `<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${pd.big?'rgba(196,160,90,0.40)':'rgba(196,160,90,0.14)'}" stroke-width="${pd.big?1.4:0.7}" stroke-dasharray="${pd.big?'none':'2,5'}"/>`;
+  }
+
+  // Dots on inner orbital rings
+  for(const pd of planetDefs){
+    if(pd.ringR===null) continue;
+    const lon=pos[pd.key]; if(lon===undefined) continue;
+    const rr=pd.ringR*ZODIAC_INNER_R, a=toRad(lon-90);
+    svg += `<circle cx="${(cx+Math.cos(a)*rr).toFixed(1)}" cy="${(cy+Math.sin(a)*rr).toFixed(1)}" r="${pd.big?DOT_SUN:DOT_MAJOR}" fill="${pd.color}" opacity="0.88"/>`;
+  }
+
+  // Planet glyphs + dots on zodiac ring
+  const PLANET_R = ZODIAC_INNER_R - size*0.035;
+  const GLYPH_R  = ZODIAC_INNER_R + size*0.028;
+  for(const pd of planetDefs){
+    const lon=pos[pd.key]; if(lon===undefined) continue;
+    const a=toRad(lon-90);
+    const px=cx+Math.cos(a)*PLANET_R, py=cy+Math.sin(a)*PLANET_R;
+    const dr=pd.big?DOT_SUN:(pd.ringR===null?DOT_MINOR:DOT_MAJOR);
+    svg += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${dr}" fill="${pd.color}" opacity="0.92"/>`;
+    const gx=cx+Math.cos(a)*GLYPH_R, gy=cy+Math.sin(a)*GLYPH_R;
+    svg += `<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="${pd.color}" font-size="${FONT_PLANET}" font-family="serif" opacity="0.95">${pd.glyph}</text>`;
+  }
+
+  // Earth crosshair
+  svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="rgba(196,160,90,0.85)"/>`;
+  svg += `<line x1="${cx-9}" y1="${cy}" x2="${cx+9}" y2="${cy}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
+  svg += `<line x1="${cx}" y1="${cy-9}" x2="${cx}" y2="${cy+9}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
+  svg += '</svg>';
+
+  // Table
+  const tableDefs=[
+    {key:'sun',glyph:'☉',label:'Sun'},{key:'moon',glyph:'☽',label:'Moon'},
+    {key:'mercury',glyph:'☿',label:'Mercury'},{key:'venus',glyph:'♀',label:'Venus'},
+    {key:'mars',glyph:'♂',label:'Mars'},{key:'jupiter',glyph:'♃',label:'Jupiter'},
+    {key:'saturn',glyph:'♄',label:'Saturn'},{key:'uranus',glyph:'⛢',label:'Uranus'},
+    {key:'neptune',glyph:'♆',label:'Neptune'},
+    {key:'northNode',glyph:'☊',label:'North Node'},{key:'southNode',glyph:'☋',label:'South Node'},
+  ];
+  let table = `<table id="${tableId}"><tbody>`;
+  table += `<tr><td colspan="3" class="natal-section-label">Planets &amp; Nodes</td></tr>`;
+  for(const pd of tableDefs){
+    const lon=pos[pd.key]; if(lon===undefined) continue;
+    table += `<tr><td>${pd.glyph} ${pd.label}</td><td>${signGlyph(lon)} ${signOf(lon)}</td><td>${degInSign(lon)}°</td></tr>`;
+  }
+  if(houses){
+    table += `<tr><td colspan="3" class="natal-section-label">House Cusps · Placidus</td></tr>`;
+    const hLabels=['I — Asc','II','III','IV — IC','V','VI','VII — Dsc','VIII','IX','X — MC','XI','XII'];
+    for(let h=0;h<12;h++){
+      table += `<tr><td>${hLabels[h]}</td><td>${signGlyph(houses[h])} ${signOf(houses[h])}</td><td>${degInSign(houses[h])}°</td></tr>`;
+    }
+  } else {
+    table += `<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Enter birthplace in Step 1 for house cusps</td></tr>`;
+  }
+  table += '</tbody></table>';
+
+  const tradition = state.system==='vedic' ? 'Vedic Sidereal · Lahiri Ayanamsa' : 'Western Tropical';
+
+  wrap.innerHTML = `
+    <div class="natal-orrery-container">${svg}</div>
+    ${table}
+    <span class="natal-tradition-label">${tradition}</span>
+  `;
+}
 </script>
 </body>
 </html>
