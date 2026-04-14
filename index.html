@@ -194,11 +194,9 @@
   .reveal.animated.visible { opacity:1; transform:translateY(0); }
 
 
-  /* NATAL ORRERY (Step 2 + Step 7) */
+  /* NATAL ORRERY */
   #natal-orrery-wrap, #natal-orrery-wrap-review {
-    margin: 2rem auto 0;
-    text-align: center;
-    display: none; /* hidden until tradition selected */
+    margin: 2rem auto 0; text-align: center; display: none;
   }
   #natal-orrery-wrap.visible, #natal-orrery-wrap-review.visible { display: block; }
   .orrery-loading {
@@ -232,6 +230,28 @@
     font-size: .52rem; font-family: var(--cinzel); letter-spacing: .18em;
     color: var(--muted); text-transform: uppercase; margin-top: 1rem;
     text-align: center; display: block;
+  }
+  /* Calculate button */
+  #btn-calculate-chart {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: var(--cinzel);
+    font-size: .65rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    padding: .9rem 2.4rem;
+    cursor: pointer;
+    transition: all .3s;
+    display: none; /* shown after tradition selected */
+    margin: 1.5rem auto 0;
+  }
+  #btn-calculate-chart:hover { border-color: var(--gold); background: rgba(196,160,90,.06); }
+  #btn-calculate-chart.visible { display: block; }
+  /* Continue grayed until chart done */
+  #btn-step2-continue { transition: opacity .4s, background .3s; }
+  #btn-step2-continue:disabled {
+    opacity: .35; cursor: default; background: var(--gold); transform: none;
   }
 
   @media(max-width:640px){
@@ -470,12 +490,15 @@
           <button class="toggle-btn" id="btn-vedic" onclick="selectSystem('vedic')">Vedic Sidereal<br><span style="font-size:.8em; font-style:italic; letter-spacing:0; text-transform:none; color:var(--muted);">Stars-based. Lahiri ayanamsa.</span></button>
         </div>
         <p class="finish-note" style="margin-top:1.2rem;">Most Western practitioners use the tropical system. Vedic (Jyotisha) tracks the actual sidereal positions of the constellations, shifting each planet approximately 23 degrees. Both encoded with full precision.</p>
+        <div style="text-align:center;">
+          <button id="btn-calculate-chart" onclick="triggerNatalCalculation()">Calculate My Chart</button>
+        </div>
         <div id="natal-orrery-wrap">
           <p class="orrery-loading">✦ &nbsp; Calculating your sky &nbsp; ✦</p>
         </div>
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(3)">Continue</button>
+          <button class="btn-nav btn-next" id="btn-step2-continue" onclick="goStep(3)" disabled>Continue</button>
         </div>
       </div>
 
@@ -762,8 +785,15 @@ function selectSystem(s){
   state.system=s;
   document.getElementById('btn-western').classList.toggle('selected',s==='western');
   document.getElementById('btn-vedic').classList.toggle('selected',s==='vedic');
-  // Trigger natal chart as soon as tradition is confirmed
-  buildNatalOrrery();
+  // Show calculate button; gray out Continue until chart runs
+  document.getElementById('btn-calculate-chart').classList.add('visible');
+  document.getElementById('btn-step2-continue').disabled = true;
+  // Reset orrery if they switch tradition after already calculating
+  if(_natalCache){
+    const wrap = document.getElementById('natal-orrery-wrap');
+    wrap.classList.add('visible');
+    wrap.innerHTML = '<p class="orrery-loading" style="opacity:.5;">✦ &nbsp; Press Calculate to update &nbsp; ✦</p>';
+  }
 }
 
 const metalIds=['silver','silver-pd','gold14','gold18','platinum'];
@@ -819,7 +849,6 @@ function buildSummary(){
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra;
   document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
-  // Re-render review orrery when they reach step 7
   renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
@@ -864,9 +893,9 @@ function moonLon(T){
   let lon=L1;
   lon+=6.2888*Math.sin(Mpr); lon+=1.2740*Math.sin(2*Dr-Mpr);
   lon+=0.6583*Math.sin(2*Dr); lon+=0.2136*Math.sin(2*Mpr);
-  lon-=0.1851*Math.sin(Mr); lon-=0.1143*Math.sin(2*Fr);
+  lon-=0.1851*Math.sin(Mr);  lon-=0.1143*Math.sin(2*Fr);
   lon+=0.0588*Math.sin(2*Dr-2*Mpr); lon+=0.0572*Math.sin(2*Dr-Mr-Mpr);
-  lon+=0.0533*Math.sin(2*Dr+Mpr); lon+=0.0458*Math.sin(2*Dr-Mr);
+  lon+=0.0533*Math.sin(2*Dr+Mpr);   lon+=0.0458*Math.sin(2*Dr-Mr);
   return norm360(lon);
 }
 
@@ -885,7 +914,7 @@ function planetHelio(T,a0,a1,e0,e1,i0,i1,L0,L1,lp0,lp1,O0,O1){
   const xh=a*(Math.cos(E)-e), yh=a*Math.sqrt(1-e*e)*Math.sin(E);
   const dist=Math.sqrt(xh*xh+yh*yh);
   const theta=norm360(toDeg(Math.atan2(yh,xh))+w+O);
-  return {lon:theta,dist:dist};
+  return {lon:theta, dist:dist};
 }
 
 function helio2geo(phLon,phDist,earthLon){
@@ -963,7 +992,7 @@ async function geocodePlace(place){
   const resp=await fetch(url,{headers:{'User-Agent':'SkySignetApp/1.0'}});
   const data=await resp.json();
   if(!data||!data.length) return null;
-  return {lat:parseFloat(data[0].lat),lon:parseFloat(data[0].lon)};
+  return {lat:parseFloat(data[0].lat), lon:parseFloat(data[0].lon)};
 }
 
 async function getTZOffset(lat,lon,dateStr){
@@ -984,31 +1013,35 @@ async function getTZOffset(lat,lon,dateStr){
   }catch(e){ return 0; }
 }
 
-// Stored computed data so Step 7 can re-render without re-fetching
 let _natalCache = null;
 
-async function buildNatalOrrery(){
-  const wrapId = 'natal-orrery-wrap';
-  const tableId = 'natal-planets-table';
-  const wrap = document.getElementById(wrapId);
-  if(!wrap) return;
+// Called by "Calculate My Chart" button
+async function triggerNatalCalculation(){
+  const btn = document.getElementById('btn-calculate-chart');
+  const continueBtn = document.getElementById('btn-step2-continue');
+  const wrap = document.getElementById('natal-orrery-wrap');
 
-  // Show the wrap
+  // Button feedback
+  btn.textContent = 'Calculating…';
+  btn.disabled = true;
   wrap.classList.add('visible');
   wrap.innerHTML = '<p class="orrery-loading">✦ &nbsp; Calculating your sky &nbsp; ✦</p>';
+  continueBtn.disabled = true;
 
   const bd = document.getElementById('birthdate').value;
   const bt = document.getElementById('birthtime').value || '12:00';
   const bp = document.getElementById('birthplace').value;
 
   if(!bd){
-    wrap.innerHTML = '<p class="natal-error">Enter your birth date and place in Step 1 first.</p>';
+    wrap.innerHTML = '<p class="natal-error">Enter your birth date in Step 1 first.</p>';
+    btn.textContent = 'Calculate My Chart';
+    btn.disabled = false;
     return;
   }
 
   try{
     const [yr,mo,dy] = bd.split('-').map(Number);
-    const [hr,mn] = bt.split(':').map(Number);
+    const [hr,mn]    = bt.split(':').map(Number);
     let utcOffset=0, geoLat=0, geoLon=0, hasGeo=false;
 
     if(bp && bp.trim().length > 1){
@@ -1018,11 +1051,9 @@ async function buildNatalOrrery(){
       }catch(e){}
     }
 
-    const utcHr = hr - utcOffset;
-    const jd = julianDay(yr,mo,dy,utcHr,mn,0);
+    const jd = julianDay(yr, mo, dy, hr-utcOffset, mn, 0);
     let positions = computePlanets(jd);
     let houses = null;
-
     if(hasGeo){ try{ houses = placidusHouses(jd,geoLat,geoLon); }catch(e){} }
 
     if(state.system === 'vedic'){
@@ -1031,18 +1062,22 @@ async function buildNatalOrrery(){
       if(houses) houses = houses.map(h=>norm360(h-ayan));
     }
 
-    // Cache for step-7 re-render
     _natalCache = {positions, houses, hasGeo};
+    renderNatalChart(wrap, 'natal-planets-table', positions, houses, hasGeo);
 
-    renderNatalChart(wrap, tableId, positions, houses, hasGeo);
+    // Unlock Continue
+    continueBtn.disabled = false;
+    btn.textContent = 'Recalculate';
+    btn.disabled = false;
 
   }catch(e){
     console.error(e);
     wrap.innerHTML = '<p class="natal-error">Could not calculate positions. Please check your birth data.</p>';
+    btn.textContent = 'Try Again';
+    btn.disabled = false;
   }
 }
 
-// Re-render from cache (used by step-7)
 function renderStoredOrrery(wrapId, tableId){
   const wrap = document.getElementById(wrapId);
   if(!wrap) return;
@@ -1054,7 +1089,6 @@ function renderStoredOrrery(wrapId, tableId){
   renderNatalChart(wrap, tableId, _natalCache.positions, _natalCache.houses, _natalCache.hasGeo);
 }
 
-// Core renderer — shared between Step 2 and Step 7
 function renderNatalChart(wrap, tableId, pos, houses, hasGeo){
   const planetDefs=[
     {key:'sun',      glyph:'☉', label:'Sun',      color:'#f0e8d5', ringR:0.39, big:true},
@@ -1070,84 +1104,73 @@ function renderNatalChart(wrap, tableId, pos, houses, hasGeo){
     {key:'southNode',glyph:'☋', label:'S. Node',  color:'#7a7468', ringR:null},
   ];
 
-  const size = Math.min(420, window.innerWidth * 0.90);
+  const size = Math.min(420, window.innerWidth*0.90);
   const cx=size/2, cy=size/2;
   const svgNS='http://www.w3.org/2000/svg';
-  const ZODIAC_R      = size*0.465;
-  const ZODIAC_INNER_R= size*0.385;
-  const FONT_PLANET   = Math.round(size*0.065);
-  const FONT_SIGN     = Math.round(size*0.050);
-  const FONT_HOUSE    = Math.round(size*0.030);
+  const ZODIAC_R       = size*0.465;
+  const ZODIAC_INNER_R = size*0.385;
+  const FONT_PLANET    = Math.round(size*0.065);
+  const FONT_SIGN      = Math.round(size*0.050);
+  const FONT_HOUSE     = Math.round(size*0.030);
   const DOT_SUN=8, DOT_MAJOR=6, DOT_MINOR=5;
 
-  let svg = `<svg viewBox="0 0 ${size} ${size}" xmlns="${svgNS}" style="display:block;width:100%;height:auto;overflow:visible;">`;
-  svg += `<defs><radialGradient id="nbg${tableId}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(196,160,90,0.08)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>`;
-  svg += `<circle cx="${cx}" cy="${cy}" r="${cx}" fill="url(#nbg${tableId})"/>`;
+  let svg=`<svg viewBox="0 0 ${size} ${size}" xmlns="${svgNS}" style="display:block;width:100%;height:auto;overflow:visible;">`;
+  svg+=`<defs><radialGradient id="nbg${tableId}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(196,160,90,0.08)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${cx}" fill="url(#nbg${tableId})"/>`;
 
-  // Zodiac band
-  svg += `<circle cx="${cx}" cy="${cy}" r="${ZODIAC_R}" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>`;
-  svg += `<circle cx="${cx}" cy="${cy}" r="${ZODIAC_INNER_R}" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${ZODIAC_R}" fill="none" stroke="rgba(196,160,90,0.30)" stroke-width="1.5"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${ZODIAC_INNER_R}" fill="none" stroke="rgba(196,160,90,0.20)" stroke-width="0.8"/>`;
 
-  // Sign dividers + glyphs
   const sigGlyphs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
   for(let s=0;s<12;s++){
     const aS=toRad(s*30-90), aM=toRad(s*30+15-90);
     const x1=cx+Math.cos(aS)*ZODIAC_INNER_R, y1=cy+Math.sin(aS)*ZODIAC_INNER_R;
     const x2=cx+Math.cos(aS)*ZODIAC_R,       y2=cy+Math.sin(aS)*ZODIAC_R;
-    svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>`;
+    svg+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="rgba(196,160,90,0.22)" stroke-width="0.8"/>`;
     const glR=(ZODIAC_R+ZODIAC_INNER_R)/2;
-    svg += `<text x="${(cx+Math.cos(aM)*glR).toFixed(1)}" y="${(cy+Math.sin(aM)*glR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="${FONT_SIGN}" font-family="serif">${sigGlyphs[s]}</text>`;
+    svg+=`<text x="${(cx+Math.cos(aM)*glR).toFixed(1)}" y="${(cy+Math.sin(aM)*glR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.60)" font-size="${FONT_SIGN}" font-family="serif">${sigGlyphs[s]}</text>`;
   }
 
-  // House lines (if Placidus available)
   if(houses){
     const hLabels=['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
     for(let h=0;h<12;h++){
-      const a=toRad(houses[h]-90);
-      const isAngle=(h===0||h===3||h===6||h===9);
+      const a=toRad(houses[h]-90), isAngle=(h===0||h===3||h===6||h===9);
       const x1=cx+Math.cos(a)*ZODIAC_INNER_R*0.95, y1=cy+Math.sin(a)*ZODIAC_INNER_R*0.95;
       const x2=cx+Math.cos(a)*ZODIAC_INNER_R*0.12, y2=cy+Math.sin(a)*ZODIAC_INNER_R*0.12;
-      svg += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${isAngle?'rgba(196,160,90,0.55)':'rgba(196,160,90,0.18)'}" stroke-width="${isAngle?1.4:0.6}" stroke-dasharray="${isAngle?'none':'3,3'}"/>`;
+      svg+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${isAngle?'rgba(196,160,90,0.55)':'rgba(196,160,90,0.18)'}" stroke-width="${isAngle?1.4:0.6}" stroke-dasharray="${isAngle?'none':'3,3'}"/>`;
       const midA=toRad(houses[h]+15-90), numR=ZODIAC_INNER_R*0.72;
-      svg += `<text x="${(cx+Math.cos(midA)*numR).toFixed(1)}" y="${(cy+Math.sin(midA)*numR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.35)" font-size="${FONT_HOUSE}" font-family="'Cinzel','Palatino Linotype',serif">${hLabels[h]}</text>`;
+      svg+=`<text x="${(cx+Math.cos(midA)*numR).toFixed(1)}" y="${(cy+Math.sin(midA)*numR).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.35)" font-size="${FONT_HOUSE}" font-family="'Cinzel','Palatino Linotype',serif">${hLabels[h]}</text>`;
     }
   }
 
-  // Orbital rings
   for(const pd of planetDefs){
     if(pd.ringR===null) continue;
     const rr=pd.ringR*ZODIAC_INNER_R;
-    svg += `<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${pd.big?'rgba(196,160,90,0.40)':'rgba(196,160,90,0.14)'}" stroke-width="${pd.big?1.4:0.7}" stroke-dasharray="${pd.big?'none':'2,5'}"/>`;
+    svg+=`<circle cx="${cx}" cy="${cy}" r="${rr.toFixed(1)}" fill="none" stroke="${pd.big?'rgba(196,160,90,0.40)':'rgba(196,160,90,0.14)'}" stroke-width="${pd.big?1.4:0.7}" stroke-dasharray="${pd.big?'none':'2,5'}"/>`;
   }
 
-  // Dots on inner orbital rings
   for(const pd of planetDefs){
     if(pd.ringR===null) continue;
     const lon=pos[pd.key]; if(lon===undefined) continue;
     const rr=pd.ringR*ZODIAC_INNER_R, a=toRad(lon-90);
-    svg += `<circle cx="${(cx+Math.cos(a)*rr).toFixed(1)}" cy="${(cy+Math.sin(a)*rr).toFixed(1)}" r="${pd.big?DOT_SUN:DOT_MAJOR}" fill="${pd.color}" opacity="0.88"/>`;
+    svg+=`<circle cx="${(cx+Math.cos(a)*rr).toFixed(1)}" cy="${(cy+Math.sin(a)*rr).toFixed(1)}" r="${pd.big?DOT_SUN:DOT_MAJOR}" fill="${pd.color}" opacity="0.88"/>`;
   }
 
-  // Planet glyphs + dots on zodiac ring
-  const PLANET_R = ZODIAC_INNER_R - size*0.035;
-  const GLYPH_R  = ZODIAC_INNER_R + size*0.028;
+  const PLANET_R=ZODIAC_INNER_R-size*0.035;
+  const GLYPH_R =ZODIAC_INNER_R+size*0.028;
   for(const pd of planetDefs){
     const lon=pos[pd.key]; if(lon===undefined) continue;
     const a=toRad(lon-90);
-    const px=cx+Math.cos(a)*PLANET_R, py=cy+Math.sin(a)*PLANET_R;
     const dr=pd.big?DOT_SUN:(pd.ringR===null?DOT_MINOR:DOT_MAJOR);
-    svg += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${dr}" fill="${pd.color}" opacity="0.92"/>`;
-    const gx=cx+Math.cos(a)*GLYPH_R, gy=cy+Math.sin(a)*GLYPH_R;
-    svg += `<text x="${gx.toFixed(1)}" y="${gy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="${pd.color}" font-size="${FONT_PLANET}" font-family="serif" opacity="0.95">${pd.glyph}</text>`;
+    svg+=`<circle cx="${(cx+Math.cos(a)*PLANET_R).toFixed(1)}" cy="${(cy+Math.sin(a)*PLANET_R).toFixed(1)}" r="${dr}" fill="${pd.color}" opacity="0.92"/>`;
+    svg+=`<text x="${(cx+Math.cos(a)*GLYPH_R).toFixed(1)}" y="${(cy+Math.sin(a)*GLYPH_R).toFixed(1)}" text-anchor="middle" dominant-baseline="central" fill="${pd.color}" font-size="${FONT_PLANET}" font-family="serif" opacity="0.95">${pd.glyph}</text>`;
   }
 
-  // Earth crosshair
-  svg += `<circle cx="${cx}" cy="${cy}" r="6" fill="rgba(196,160,90,0.85)"/>`;
-  svg += `<line x1="${cx-9}" y1="${cy}" x2="${cx+9}" y2="${cy}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
-  svg += `<line x1="${cx}" y1="${cy-9}" x2="${cx}" y2="${cy+9}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
-  svg += '</svg>';
+  svg+=`<circle cx="${cx}" cy="${cy}" r="6" fill="rgba(196,160,90,0.85)"/>`;
+  svg+=`<line x1="${cx-9}" y1="${cy}" x2="${cx+9}" y2="${cy}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
+  svg+=`<line x1="${cx}" y1="${cy-9}" x2="${cx}" y2="${cy+9}" stroke="rgba(8,9,12,0.85)" stroke-width="2"/>`;
+  svg+='</svg>';
 
-  // Table
   const tableDefs=[
     {key:'sun',glyph:'☉',label:'Sun'},{key:'moon',glyph:'☽',label:'Moon'},
     {key:'mercury',glyph:'☿',label:'Mercury'},{key:'venus',glyph:'♀',label:'Venus'},
@@ -1156,26 +1179,25 @@ function renderNatalChart(wrap, tableId, pos, houses, hasGeo){
     {key:'neptune',glyph:'♆',label:'Neptune'},
     {key:'northNode',glyph:'☊',label:'North Node'},{key:'southNode',glyph:'☋',label:'South Node'},
   ];
-  let table = `<table id="${tableId}"><tbody>`;
-  table += `<tr><td colspan="3" class="natal-section-label">Planets &amp; Nodes</td></tr>`;
+  let table=`<table id="${tableId}"><tbody>`;
+  table+=`<tr><td colspan="3" class="natal-section-label">Planets &amp; Nodes</td></tr>`;
   for(const pd of tableDefs){
     const lon=pos[pd.key]; if(lon===undefined) continue;
-    table += `<tr><td>${pd.glyph} ${pd.label}</td><td>${signGlyph(lon)} ${signOf(lon)}</td><td>${degInSign(lon)}°</td></tr>`;
+    table+=`<tr><td>${pd.glyph} ${pd.label}</td><td>${signGlyph(lon)} ${signOf(lon)}</td><td>${degInSign(lon)}°</td></tr>`;
   }
   if(houses){
-    table += `<tr><td colspan="3" class="natal-section-label">House Cusps · Placidus</td></tr>`;
+    table+=`<tr><td colspan="3" class="natal-section-label">House Cusps · Placidus</td></tr>`;
     const hLabels=['I — Asc','II','III','IV — IC','V','VI','VII — Dsc','VIII','IX','X — MC','XI','XII'];
     for(let h=0;h<12;h++){
-      table += `<tr><td>${hLabels[h]}</td><td>${signGlyph(houses[h])} ${signOf(houses[h])}</td><td>${degInSign(houses[h])}°</td></tr>`;
+      table+=`<tr><td>${hLabels[h]}</td><td>${signGlyph(houses[h])} ${signOf(houses[h])}</td><td>${degInSign(houses[h])}°</td></tr>`;
     }
   } else {
-    table += `<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Enter birthplace in Step 1 for house cusps</td></tr>`;
+    table+=`<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Enter birthplace in Step 1 for house cusps</td></tr>`;
   }
-  table += '</tbody></table>';
+  table+='</tbody></table>';
 
-  const tradition = state.system==='vedic' ? 'Vedic Sidereal · Lahiri Ayanamsa' : 'Western Tropical';
-
-  wrap.innerHTML = `
+  const tradition=state.system==='vedic'?'Vedic Sidereal · Lahiri Ayanamsa':'Western Tropical';
+  wrap.innerHTML=`
     <div class="natal-orrery-container">${svg}</div>
     ${table}
     <span class="natal-tradition-label">${tradition}</span>
