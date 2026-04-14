@@ -1109,6 +1109,55 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
 
   // Planet glyphs on their orbital rings; nodes outside the zodiac perimeter
   const NODE_R = ZR * 1.08;
+
+  // Pre-compute planet positions for collision detection
+  const planetPositions = [];
+  for (const pd of PLANET_DEFS) {
+    const lon = planets[pd.key];
+    if (lon === undefined) continue;
+    const a = lonToRad(lon);
+    const rr = pd.ringR ? pd.ringR * ZI : NODE_R;
+    planetPositions.push({ a, rr, px: cx + Math.cos(a)*rr, py: cy + Math.sin(a)*rr });
+  }
+
+  // Planetary pointer triangles — small filled chevrons just inside zodiac ring, pointing outward
+  for (const pd of PLANET_DEFS) {
+    const lon = planets[pd.key];
+    if (lon === undefined || !pd.ringR) continue; // nodes don't need pointers
+    const a = lonToRad(lon);
+    const tipR = ZI - 1;   // tip points toward zodiac ring
+    const baseR = ZI - 9;  // base sits inward
+    const spread = 0.045;
+    const tx = cx + Math.cos(a) * tipR, ty = cy + Math.sin(a) * tipR;
+    const b1x = cx + Math.cos(a - spread) * baseR, b1y = cy + Math.sin(a - spread) * baseR;
+    const b2x = cx + Math.cos(a + spread) * baseR, b2y = cy + Math.sin(a + spread) * baseR;
+    s += '<polygon points="' + tx.toFixed(1)+','+ty.toFixed(1)+' '+b1x.toFixed(1)+','+b1y.toFixed(1)+' '+b2x.toFixed(1)+','+b2y.toFixed(1) + '" fill="' + pd.color + '" opacity="0.55"/>';
+  }
+
+  // Angle labels (ASC/IC/DSC/MC) — slide radially to avoid planet glyphs
+  if (houses && houses.length === 12) {
+    const angleLabels = { 0:'ASC', 3:'IC', 6:'DSC', 9:'MC' };
+    const FA = Math.round(sz * 0.026);
+    for (const [hIdx, label] of Object.entries(angleLabels)) {
+      const a = lonToRad(houses[parseInt(hIdx)]);
+      // Try candidate radii from 0.75 inward, nudge until clear of all planets
+      const candidates = [0.75, 0.65, 0.55, 0.82, 0.45, 0.88];
+      let chosenR = ZI * 0.75;
+      for (const frac of candidates) {
+        const tr = ZI * frac;
+        const tx = cx + Math.cos(a) * tr, ty = cy + Math.sin(a) * tr;
+        const clear = planetPositions.every(p => {
+          const dx = p.px - tx, dy = p.py - ty;
+          return Math.sqrt(dx*dx + dy*dy) > (sz * 0.06);
+        });
+        if (clear) { chosenR = tr; break; }
+      }
+      const lx = cx + Math.cos(a) * chosenR, ly = cy + Math.sin(a) * chosenR;
+      s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central"';
+      s += ' fill="rgba(196,160,90,0.65)" font-size="' + FA + '" font-family="var(--cinzel),serif" letter-spacing="1">' + label + '</text>';
+    }
+  }
+
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
