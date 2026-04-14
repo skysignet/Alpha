@@ -1104,28 +1104,18 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     s += ' stroke-dasharray="' + (pd.big ? 'none' : '2,5') + '"/>';
   }
 
-  // Planet dots on inner orbital rings
-  for (const pd of PLANET_DEFS) {
-    if (!pd.ringR) continue;
-    const lon = planets[pd.key];
-    if (lon === undefined) continue;
-    const rr = pd.ringR * ZI;
-    const a = lonToRad(lon);
-    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.88"/>';
-  }
-
-  // Planet glyphs + dots on zodiac ring (all planets including nodes)
-  const PR = ZI - sz * 0.035;
-  const GR = ZI + sz * 0.028;
+  // Planet glyphs on inner orbital rings (nodes sit just inside zodiac band)
+  const NODE_R = ZI * 0.88;
   for (const pd of PLANET_DEFS) {
     const lon = planets[pd.key];
     if (lon === undefined) continue;
-    const a = lonToRad(lon);
-    s += '<circle cx="' + (cx+Math.cos(a)*PR).toFixed(1) + '" cy="' + (cy+Math.sin(a)*PR).toFixed(1) + '" r="' + (pd.big ? DS : DM) + '" fill="' + pd.color + '" opacity="0.92"/>';
-    s += '<text x="' + (cx+Math.cos(a)*GR).toFixed(1) + '" y="' + (cy+Math.sin(a)*GR).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + FP + '" font-family="serif" opacity="0.95">' + pd.glyph + '</text>';
+    const a  = lonToRad(lon);
+    const rr = pd.ringR ? pd.ringR * ZI : NODE_R;
+    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS+2 : DM+1) + '" fill="rgba(8,9,12,0.55)"/>';
+    s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.82)) + '" font-family="serif" opacity="0.97">' + pd.glyph + '</text>';
   }
 
-  // North Node pointer at 12 o'clock
+    // North Node pointer at 12 o'clock
   s += '<line x1="' + cx + '" y1="' + (cy - ZI * 0.92) + '" x2="' + cx + '" y2="' + (cy - ZI * 1.02) + '" stroke="rgba(232,208,138,0.80)" stroke-width="2.5" stroke-linecap="round"/>';
   s += '<text x="' + cx + '" y="' + (cy - ZI * 1.13) + '" text-anchor="middle" dominant-baseline="central" fill="rgba(232,208,138,0.70)" font-size="' + Math.round(sz*0.032) + '" font-family="serif">\u260a</text>';
 
