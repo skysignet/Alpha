@@ -1036,7 +1036,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
   const rotOffset = (northNodeLon !== undefined) ? northNodeLon : 0;
 
   // Helper: ecliptic lon → SVG angle in radians, with rotation applied
-  const lonToRad = lon => toRad(((lon - rotOffset) % 360 + 360) % 360 - 90);
+  const lonToRad = lon => toRad(-(((lon - rotOffset) % 360 + 360) % 360) - 90);
 
   const sz = Math.min(420, window.innerWidth * 0.90);
   const cx = sz / 2, cy = sz / 2;
