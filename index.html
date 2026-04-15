@@ -1104,7 +1104,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
           break; // will be refined below; for now just use the default first candidate
         }
         const labelR  = ZI * labelFrac;
-        const gapHalf = sz * 0.052; // half-gap in px around the label centre
+        const gapHalf = sz * 0.034; // half-gap in px around the label centre
         const outerR  = ZI * 0.95;
         const innerR  = ZI * 0.12;
         // Outer segment: from zodiac ring inward to just before the label
@@ -1188,7 +1188,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
         if (clear) { chosenR = tr; break; }
       }
       const lx = cx + Math.cos(a) * chosenR, ly = cy + Math.sin(a) * chosenR;
-      const cr = FA * 1.05;
+      const cr = FA * 0.68;
       s += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="' + cr.toFixed(1) + '" fill="rgba(8,9,12,0.88)"/>';
       s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central"';
       s += ' fill="rgba(196,160,90,0.90)" font-size="' + FA + '" font-family="var(--cinzel),serif" letter-spacing="1">' + label + '</text>';
