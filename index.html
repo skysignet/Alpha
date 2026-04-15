@@ -407,52 +407,7 @@
       <p style="color:var(--muted); font-style:italic;">Each ring is bespoke. No two are the same.<br>This one is yours alone.</p>
     </div>
 
-    <!-- EMAIL GATE -->
-    <div id="emailGate" style="max-width:600px; margin:0 auto 3rem; text-align:center;">
-      <p style="font-size:1.05rem; color:var(--text); line-height:2; margin-bottom:.75rem;">Every SkySignet Ring begins with your birth chart. Each chart is calculated individually before your commission proceeds.</p>
-      <p style="font-size:.9rem; color:var(--muted); font-style:italic; line-height:2; margin-bottom:2rem;">Enter your email to begin your bespoke commission.</p>
-      <div class="kit-form-wrap">
-        <form id="kitGateForm" class="kit-form">
-          <div class="kit-form__row">
-            <input type="email" id="kitGateEmail" class="kit-form__input" placeholder="your@email.com" required autocomplete="email">
-            <button type="submit" class="kit-form__btn">Commission Yours</button>
-          </div>
-          <p class="kit-form__msg" id="kitGateMsg"></p>
-        </form>
-      </div>
-      <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">Your information is held in confidence and never shared.</p>
-    </div>
-    <script>
-    document.getElementById('kitGateForm').addEventListener('submit', async function(e){
-      e.preventDefault();
-      const email = document.getElementById('kitGateEmail').value;
-      const msg = document.getElementById('kitGateMsg');
-      const btn = this.querySelector('button');
-      btn.textContent = 'Sending...';
-      btn.disabled = true;
-      try {
-        const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
-        });
-        const data = await res.json();
-        if(data.subscription) {
-          document.getElementById('emailGate').style.display = 'none';
-          document.getElementById('wizardWrap').style.display = 'block';
-        } else {
-          throw new Error();
-        }
-      } catch(err) {
-        msg.textContent = 'Something went wrong. Please try again.';
-        msg.style.color = 'var(--muted)';
-        btn.textContent = 'Commission Yours';
-        btn.disabled = false;
-      }
-    });
-    </script>
-
-    <div id="wizardWrap" style="display:none;">
+    <div id="wizardWrap">
 
     <div class="wizard__progress" id="progressBar">
       <div class="progress-step active" data-step="1"><div class="progress-dot">1</div><span class="progress-label">Birth</span></div>
@@ -496,6 +451,22 @@
         <div id="natal-orrery-wrap">
           <p class="orrery-loading">✶ &nbsp; Your chart will appear here &nbsp; ✶</p>
         </div>
+        <!-- EMAIL CAPTURE — shown after chart calculates -->
+        <div id="emailCaptureWrap" style="display:none; max-width:520px; margin:2rem auto 0; text-align:center;">
+          <p style="font-size:1rem; color:var(--text); line-height:2; margin-bottom:.5rem;">Your chart is ready.</p>
+          <p style="font-size:.88rem; color:var(--muted); font-style:italic; line-height:2; margin-bottom:1.5rem;">Enter your email to continue your commission and receive a personalised copy of your chart.</p>
+          <div class="kit-form-wrap">
+            <form id="kitChartForm" class="kit-form">
+              <div class="kit-form__row">
+                <input type="email" id="kitChartEmail" class="kit-form__input" placeholder="your@email.com" required autocomplete="email">
+                <button type="submit" class="kit-form__btn">Send My Chart</button>
+              </div>
+              <p class="kit-form__msg" id="kitChartMsg"></p>
+            </form>
+          </div>
+          <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1rem;">Your information is held in confidence and never shared.</p>
+        </div>
+
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
           <button class="btn-nav btn-next" id="btn-step2-continue" onclick="goStep(3)" disabled>Continue</button>
@@ -982,7 +953,9 @@ async function triggerNatalCalculation() {
 
     renderNatalChart(wrap, 'natal-planets-table', planets, houses, angles);
 
-    cont.disabled = false;
+    // Show email capture after chart renders; keep Continue disabled until email submitted
+    document.getElementById('emailCaptureWrap').style.display = 'block';
+    cont.disabled = true;
     btn.textContent = 'Recalculate';
     btn.disabled = false;
 
@@ -1250,6 +1223,40 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
 
   wrap.innerHTML = '<div class="natal-orrery-container">' + s + '</div>' + t + '<span class="natal-tradition-label">' + tradition + '</span>';
 }
+
+// Kit email capture after chart calculation
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('kitChartForm');
+  if (!form) return;
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('kitChartEmail').value;
+    const msg = document.getElementById('kitChartMsg');
+    const btn = form.querySelector('button');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
+      });
+      const data = await res.json();
+      if (data.subscription) {
+        document.getElementById('emailCaptureWrap').innerHTML =
+          '<p style="font-family:var(--cinzel); font-size:.65rem; letter-spacing:.25em; color:var(--gold); text-transform:uppercase; margin-top:1rem;">\u2736 &nbsp; Chart sent &nbsp; \u2736</p>';
+        document.getElementById('btn-step2-continue').disabled = false;
+      } else {
+        throw new Error();
+      }
+    } catch(err) {
+      msg.textContent = 'Something went wrong. Please try again.';
+      msg.style.color = 'var(--muted)';
+      btn.textContent = 'Send My Chart';
+      btn.disabled = false;
+    }
+  });
+});
 </script>
 </body>
 </html>
