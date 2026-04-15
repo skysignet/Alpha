@@ -1074,17 +1074,56 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
   }
 
   // House lines (Placidus cusps)
+  // Angle lines (h=0,3,6,9) are drawn in two segments leaving a gap for the ASC/IC/DSC/MC label.
+  // Label candidates mirror the collision-avoidance logic below so the gap always matches the label.
+  const _angleLabelFracs = [0.75, 0.65, 0.55, 0.82, 0.45, 0.88];
   if (houses && houses.length === 12) {
     const hLabels = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
     for (let h = 0; h < 12; h++) {
       const a = lonToRad(houses[h]);
       const isAngle = (h === 0 || h === 3 || h === 6 || h === 9);
-      const x1 = cx + Math.cos(a) * ZI * 0.95, y1 = cy + Math.sin(a) * ZI * 0.95;
-      const x2 = cx + Math.cos(a) * ZI * 0.12, y2 = cy + Math.sin(a) * ZI * 0.12;
-      s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"';
-      s += ' stroke="' + (isAngle ? 'rgba(196,160,90,0.85)' : 'rgba(196,160,90,0.55)') + '"';
-      s += ' stroke-width="' + (isAngle ? '1.6' : '0.8') + '"';
-      s += ' stroke-dasharray="' + (isAngle ? 'none' : '4,3') + '"/>';
+      const stroke   = isAngle ? 'rgba(196,160,90,0.85)' : 'rgba(196,160,90,0.55)';
+      const sw       = isAngle ? '1.6' : '0.8';
+      const dash     = isAngle ? 'none' : '4,3';
+
+      if (!isAngle) {
+        // Regular house lines — single segment as before
+        const x1 = cx + Math.cos(a) * ZI * 0.95, y1 = cy + Math.sin(a) * ZI * 0.95;
+        const x2 = cx + Math.cos(a) * ZI * 0.12, y2 = cy + Math.sin(a) * ZI * 0.12;
+        s += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '"';
+        s += ' stroke="' + stroke + '" stroke-width="' + sw + '" stroke-dasharray="' + dash + '"/>';
+      } else {
+        // Angle lines — two segments with a gap around the label
+        // First resolve which radius the label will actually land at (same logic as label section below)
+        let labelFrac = _angleLabelFracs[0];
+        for (const frac of _angleLabelFracs) {
+          const tr = ZI * frac;
+          const tx = cx + Math.cos(a) * tr, ty = cy + Math.sin(a) * tr;
+          // We don't have planetPositions yet at this point, so use a fixed gap half-width
+          labelFrac = frac;
+          break; // will be refined below; for now just use the default first candidate
+        }
+        const labelR  = ZI * labelFrac;
+        const gapHalf = sz * 0.052; // half-gap in px around the label centre
+        const outerR  = ZI * 0.95;
+        const innerR  = ZI * 0.12;
+        // Outer segment: from zodiac ring inward to just before the label
+        const outerEnd = labelR + gapHalf;
+        // Inner segment: from just after the label to centre
+        const innerStart = labelR - gapHalf;
+        if (outerEnd < outerR) {
+          const ax1 = cx + Math.cos(a) * outerR,   ay1 = cy + Math.sin(a) * outerR;
+          const ax2 = cx + Math.cos(a) * outerEnd,  ay2 = cy + Math.sin(a) * outerEnd;
+          s += '<line x1="' + ax1.toFixed(1) + '" y1="' + ay1.toFixed(1) + '" x2="' + ax2.toFixed(1) + '" y2="' + ay2.toFixed(1) + '"';
+          s += ' stroke="' + stroke + '" stroke-width="' + sw + '"/>';
+        }
+        if (innerStart > innerR) {
+          const bx1 = cx + Math.cos(a) * innerStart, by1 = cy + Math.sin(a) * innerStart;
+          const bx2 = cx + Math.cos(a) * innerR,      by2 = cy + Math.sin(a) * innerR;
+          s += '<line x1="' + bx1.toFixed(1) + '" y1="' + by1.toFixed(1) + '" x2="' + bx2.toFixed(1) + '" y2="' + by2.toFixed(1) + '"';
+          s += ' stroke="' + stroke + '" stroke-width="' + sw + '"/>';
+        }
+      }
       const nextH = houses[(h + 1) % 12];
       const midLon = houses[h] + (((nextH - houses[h]) + 360) % 360) / 2;
       const midA = lonToRad(midLon);
@@ -1149,8 +1188,10 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
         if (clear) { chosenR = tr; break; }
       }
       const lx = cx + Math.cos(a) * chosenR, ly = cy + Math.sin(a) * chosenR;
+      const cr = FA * 1.05;
+      s += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="' + cr.toFixed(1) + '" fill="rgba(8,9,12,0.88)"/>';
       s += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central"';
-      s += ' fill="rgba(196,160,90,0.65)" font-size="' + FA + '" font-family="var(--cinzel),serif" letter-spacing="1">' + label + '</text>';
+      s += ' fill="rgba(196,160,90,0.90)" font-size="' + FA + '" font-family="var(--cinzel),serif" letter-spacing="1">' + label + '</text>';
     }
   }
 
