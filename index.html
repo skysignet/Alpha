@@ -1201,7 +1201,8 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     if (lon === undefined) continue;
     const a  = lonToRad(lon);
     const rr = pd.ringR ? pd.ringR * ZI : NODE_R;
-    s += '<circle cx="' + (cx+Math.cos(a)*rr).toFixed(1) + '" cy="' + (cy+Math.sin(a)*rr).toFixed(1) + '" r="' + (pd.big ? DS+4 : DM+3) + '" fill="rgba(8,9,12,0.65)"/>';
+    const extraStroke = (pd.key === 'Venus' || pd.key === 'Mars') ? ' stroke="' + pd.color + '" stroke-width="0.8" paint-order="stroke"' : '';
+    s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.85)) + '" font-family="serif" opacity="0.97"' + extraStroke + '>' + pd.glyph + '</text>';
     s += '<text x="' + (cx+Math.cos(a)*rr).toFixed(1) + '" y="' + (cy+Math.sin(a)*rr).toFixed(1) + '" text-anchor="middle" dominant-baseline="central" fill="' + pd.color + '" font-size="' + (pd.big ? FP : Math.round(FP*0.85)) + '" font-family="serif" opacity="0.97">' + pd.glyph + '</text>';
   }
 
