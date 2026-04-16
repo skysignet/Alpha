@@ -392,8 +392,8 @@
   <div class="container">
     <div class="configurator__header reveal">
       <span class="section-label">✦ Commission Yours ✦</span>
-      <h2 class="section-title">Commission Your SkySignet Ring</h2>
-      <p style="color:var(--muted); font-style:italic;">Completely bespoke. No two rings are alike.<br>This one is yours alone.</p>
+      <h2 class="section-title">Create Your SkySignet Ring</h2>
+      <p style="color:var(--muted); font-style:italic;">No two are the same. Bespoke 1/1.</p>
     </div>
 
     <!-- wizard opens directly; email collected after chart renders in step 2 -->
@@ -527,12 +527,20 @@
       <div class="wizard__panel" id="step-5">
         <p class="panel-title">Final details</p>
         <p class="panel-subtitle">Engraved on the interior of the band.</p>
-        <div class="field-row">
-          <div class="field-group"><label class="field-label">First Initial</label><input type="text" class="field-input" id="initial1" maxlength="1" placeholder="J" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-          <div class="field-group"><label class="field-label">Middle Initial <span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$22</span></label><input type="text" class="field-input" id="initial2" maxlength="1" placeholder="—" oninput="updateMiddleInitial(this.value)" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-          <div class="field-group"><label class="field-label">Last Initial</label><input type="text" class="field-input" id="initial3" maxlength="1" placeholder="S" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+        <div class="field-group" style="margin-bottom:1.25rem;">
+          <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;">
+            <input type="checkbox" id="initialsEnabled" onchange="toggleInitials(this.checked)" style="width:1.1rem;height:1.1rem;accent-color:var(--gold);cursor:pointer;">
+            <span class="field-label" style="margin-bottom:0;">Engrave Initials &nbsp;<span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$33</span></span>
+          </label>
         </div>
-        <p class="finish-note">Initials are engraved on the interior of the band. Middle initial adds $22.</p>
+        <div id="initials-fields" style="display:none;">
+          <div class="field-row">
+            <div class="field-group"><label class="field-label">First Initial</label><input type="text" class="field-input" id="initial1" maxlength="1" placeholder="J" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+            <div class="field-group"><label class="field-label">Middle Initial</label><input type="text" class="field-input" id="initial2" maxlength="1" placeholder="—" oninput="updateMiddleInitial(this.value)" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+            <div class="field-group"><label class="field-label">Last Initial</label><input type="text" class="field-input" id="initial3" maxlength="1" placeholder="S" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+          </div>
+          <p class="finish-note">Initials are engraved on the interior of the band.</p>
+        </div>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Ring Size (US)</label>
           <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;">
@@ -553,13 +561,14 @@
         <p class="panel-title">Your commission</p>
         <p class="panel-subtitle">Review before proceeding to payment.</p>
         <div id="natal-orrery-wrap-review"><p class="orrery-loading">✶ &nbsp; Your sky &nbsp; ✶</p></div>
-        <div class="unique-note">✦ Cast once, for you alone — the only ring in the world that carries this exact sky.</div>
         <div class="summary-block" id="order-summary">
           <div class="summary-row"><span class="summary-key">Birth</span><span class="summary-val" id="sum-birth">—</span></div>
           <div class="summary-row"><span class="summary-key">Tradition</span><span class="summary-val" id="sum-system">—</span></div>
           <div class="summary-row"><span class="summary-key">Metal</span><span class="summary-val" id="sum-metal">—</span></div>
           <div class="summary-row"><span class="summary-key">Band</span><span class="summary-val" id="sum-band">—</span></div>
+          <div class="summary-row" id="sum-band-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Stars &amp; Diamonds</span><span class="summary-val" style="color:var(--gold);">+$555</span></div>
           <div class="summary-row"><span class="summary-key">Initials</span><span class="summary-val" id="sum-initials">—</span></div>
+          <div class="summary-row" id="sum-initials-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Initial Engraving</span><span class="summary-val" style="color:var(--gold);">+$33</span></div>
           <div class="summary-row"><span class="summary-key">Ring Size</span><span class="summary-val" id="sum-size">—</span></div>
           <div class="summary-total"><span class="total-label">Total</span><span class="total-price" id="sum-total">$—</span></div>
         </div>
@@ -620,7 +629,7 @@ document.querySelectorAll('.reveal').forEach(el=>{ el.classList.add('animated');
 
 // ORRERY
 
-const state={step:1,system:'western',metal:null,metalPrice:0,finish:null,band:null,bandExtra:0,middleInitial:'',middleExtra:0};
+const state={step:1,system:'western',metal:null,metalPrice:0,finish:null,band:null,bandExtra:0,initialsEnabled:false,middleInitial:'',middleExtra:0};
 
 function goStep(n){
   document.getElementById('step-'+state.step).classList.remove('active');
@@ -658,9 +667,22 @@ function selectMetal(m,price){
   document.getElementById('btn-step3-continue').disabled = false;
 }
 
+function toggleInitials(checked){
+  state.initialsEnabled = checked;
+  document.getElementById('initials-fields').style.display = checked ? '' : 'none';
+  if(!checked){
+    document.getElementById('initial1').value = '';
+    document.getElementById('initial2').value = '';
+    document.getElementById('initial3').value = '';
+    state.middleInitial = '';
+    state.middleExtra = 0;
+  } else {
+    state.middleExtra = 33;
+  }
+}
+
 function updateMiddleInitial(val){
   state.middleInitial = val ? val.toUpperCase() : '';
-  state.middleExtra = val && val.trim().length > 0 ? 22 : 0;
 }
 
 function selectBand(b){
@@ -718,9 +740,16 @@ function buildSummary(){
   document.getElementById('sum-system').textContent=state.system==='vedic'?'Vedic Sidereal (Lahiri)':'Western Tropical';
   document.getElementById('sum-metal').textContent=metalNames[state.metal]||'—';
   document.getElementById('sum-band').textContent=bandNames[state.band]||'—';
+  // band upsell line item
+  const bandExtraRow = document.getElementById('sum-band-extra-row');
+  if(bandExtraRow) bandExtraRow.style.display = state.bandExtra > 0 ? '' : 'none';
+  // initials
   let initialsDisplay = '';
-  if(i1||i3){ initialsDisplay = [i1,i2,i3].filter(Boolean).join(' · '); }
-  document.getElementById('sum-initials').textContent=initialsDisplay||'—';
+  if(state.initialsEnabled && (i1||i2||i3)){ initialsDisplay = [i1,i2,i3].filter(Boolean).join(' · '); }
+  document.getElementById('sum-initials').textContent = state.initialsEnabled ? (initialsDisplay || '(none entered)') : '—';
+  // initials upsell line item
+  const initialsExtraRow = document.getElementById('sum-initials-extra-row');
+  if(initialsExtraRow) initialsExtraRow.style.display = state.initialsEnabled ? '' : 'none';
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra+state.middleExtra;
   document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
