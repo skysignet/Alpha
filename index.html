@@ -790,7 +790,7 @@ function selectSystem(s){
   }
 }
 
-const metalIds=['silver','silver-pd','gold14','gold18','platinum'];
+const metalIds=['bronze','silver','silver-pd','gold14','gold18','platinum'];
 function selectMetal(m,price){
   state.metal=m; state.metalPrice=price;
   metalIds.forEach(x=>{ const el=document.getElementById('metal-'+x); if(el) el.classList.remove('selected'); });
