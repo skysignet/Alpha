@@ -393,21 +393,64 @@
   <div class="container">
     <div class="configurator__header reveal">
       <span class="section-label">✦ Commission Yours ✦</span>
-      <h2 class="section-title">Begin Your SkySignet</h2>
+      <h2 class="section-title">Commission Your SkySignet Ring</h2>
       <p style="color:var(--muted); font-style:italic;">Completely bespoke. No two rings are alike.<br>This one is yours alone.</p>
     </div>
 
-    <!-- wizard opens directly; email collected after chart renders in step 2 -->
-    <div id="wizardWrap">
+    <!-- EMAIL GATE -->
+    <div id="emailGate" style="max-width:600px; margin:0 auto 3rem; text-align:center;">
+      <p style="font-size:1.05rem; color:var(--text); line-height:2; margin-bottom:.75rem;">Every SkySignet begins with your birth chart. I calculate it personally, before your commission proceeds.</p>
+      <p style="font-size:.9rem; color:var(--muted); font-style:italic; line-height:2; margin-bottom:2rem;">Enter your email to unlock the commission wizard and receive your chart calculation.</p>
+      <div class="kit-form-wrap">
+        <form id="kitGateForm" class="kit-form">
+          <div class="kit-form__row">
+            <input type="email" id="kitGateEmail" class="kit-form__input" placeholder="your@email.com" required autocomplete="email">
+            <button type="submit" class="kit-form__btn">Unlock My Chart</button>
+          </div>
+          <p class="kit-form__msg" id="kitGateMsg"></p>
+        </form>
+      </div>
+      <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">No spam. No sharing. Your chart belongs to you.</p>
+    </div>
+    <script>
+    document.getElementById('kitGateForm').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const email = document.getElementById('kitGateEmail').value;
+      const msg = document.getElementById('kitGateMsg');
+      const btn = this.querySelector('button');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
+        });
+        const data = await res.json();
+        if(data.subscription) {
+          document.getElementById('emailGate').style.display = 'none';
+          document.getElementById('wizardWrap').style.display = 'block';
+        } else {
+          throw new Error();
+        }
+      } catch(err) {
+        msg.textContent = 'Something went wrong. Please try again.';
+        msg.style.color = 'var(--muted)';
+        btn.textContent = 'Unlock My Chart';
+        btn.disabled = false;
+      }
+    });
+    </script>
+
+    <div id="wizardWrap" style="display:none;">
 
     <div class="wizard__progress" id="progressBar">
       <div class="progress-step active" data-step="1"><div class="progress-dot">1</div><span class="progress-label">Birth</span></div>
       <div class="progress-step" data-step="2"><div class="progress-dot">2</div><span class="progress-label">Tradition</span></div>
       <div class="progress-step" data-step="3"><div class="progress-dot">3</div><span class="progress-label">Metal</span></div>
-      <div class="progress-step" data-step="4"><div class="progress-dot">4</div><span class="progress-label">Finish</span></div>
-      <div class="progress-step" data-step="5"><div class="progress-dot">5</div><span class="progress-label">Band</span></div>
-      <div class="progress-step" data-step="6"><div class="progress-dot">6</div><span class="progress-label">Details</span></div>
-      <div class="progress-step" data-step="7"><div class="progress-dot">7</div><span class="progress-label">Review</span></div>
+      <div class="progress-step" data-step="4"><div class="progress-dot">4</div><span class="progress-label">Band</span></div>
+      <div class="progress-step" data-step="5"><div class="progress-dot">5</div><span class="progress-label">Details</span></div>
+      <div class="progress-step" data-step="6"><div class="progress-dot">6</div><span class="progress-label">Review</span></div>
     </div>
 
     <div class="wizard">
@@ -441,19 +484,6 @@
         </div>
         <div id="natal-orrery-wrap">
           <p class="orrery-loading">✶ &nbsp; Your chart will appear here &nbsp; ✶</p>
-        </div>
-        <div id="chartEmailGate" style="display:none; margin-top:2.5rem; background:var(--card); border:1px solid var(--border); padding:2rem; text-align:center;">
-          <p style="font-family:var(--cinzel); font-size:.62rem; letter-spacing:.28em; color:var(--gold); text-transform:uppercase; margin-bottom:.75rem;">✦ Your Chart is Ready ✦</p>
-          <p style="font-size:1.05rem; color:var(--text); line-height:2; margin-bottom:.5rem;">Enter your email to receive your chart and continue your commission.</p>
-          <p style="font-size:.88rem; color:var(--muted); font-style:italic; margin-bottom:1.5rem; line-height:2;">Your chart belongs to you. We will send it to your inbox and keep you informed at every stage of your commission.</p>
-          <div class="kit-form-wrap">
-            <div class="kit-form__row">
-              <input type="email" id="chartEmail" class="kit-form__input" placeholder="your@email.com" autocomplete="email">
-              <button class="kit-form__btn" id="chartEmailBtn" onclick="submitChartEmail()">Send My Chart</button>
-            </div>
-            <p class="kit-form__msg" id="chartEmailMsg"></p>
-          </div>
-          <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">No spam. No sharing. Your chart belongs to you.</p>
         </div>
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
@@ -493,33 +523,12 @@
         </div>
         <div class="wizard__nav wizard__nav--split">
           <button class="btn-nav btn-back" onclick="goStep(2)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(4)">Continue</button>
+          <button class="btn-nav btn-next" id="btn-step3-continue" onclick="goStep(4)" disabled>Continue</button>
         </div>
       </div>
 
       <!-- STEP 4 -->
       <div class="wizard__panel" id="step-4">
-        <p class="panel-title">Choose your finish</p>
-        <p class="panel-subtitle" id="finish-subtitle">Two ways to meet the light.</p>
-        <div class="option-grid">
-          <div class="option-card" onclick="selectFinish('polished')" id="finish-polished">
-            <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◌</span></div>
-            <p class="option-card__name">Polished</p><p class="option-card__desc">Bright, reflective, freshly cast. The metal as it comes from the fire.</p>
-          </div>
-          <div class="option-card" onclick="selectFinish('oxidized')" id="finish-oxidized">
-            <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◉</span></div>
-            <p class="option-card__name">Oxidized</p><p class="option-card__desc">Pre-patinaed. Recessed lines go dark. Raised planets catch the light. The ancient instrument look.</p>
-          </div>
-        </div>
-        <p class="finish-note" id="finish-note"></p>
-        <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(3)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(5)">Continue</button>
-        </div>
-      </div>
-
-      <!-- STEP 5 -->
-      <div class="wizard__panel" id="step-5">
         <p class="panel-title">Choose your band</p>
         <p class="panel-subtitle">The pattern engraved in relief around the shank.</p>
         <div class="option-grid" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));">
@@ -541,20 +550,21 @@
           </div>
         </div>
         <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(4)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(6)">Continue</button>
+          <button class="btn-nav btn-back" onclick="goStep(3)">&larr; Back</button>
+          <button class="btn-nav btn-next" onclick="goStep(5)">Continue</button>
         </div>
       </div>
 
-      <!-- STEP 6 -->
-      <div class="wizard__panel" id="step-6">
+      <!-- STEP 5 -->
+      <div class="wizard__panel" id="step-5">
         <p class="panel-title">Final details</p>
-        <p class="panel-subtitle">Your initials, engraved on the interior of the band.</p>
+        <p class="panel-subtitle">Engraved on the interior of the band.</p>
         <div class="field-row">
           <div class="field-group"><label class="field-label">First Initial</label><input type="text" class="field-input" id="initial1" maxlength="1" placeholder="J" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-          <div class="field-group"><label class="field-label">Last Initial</label><input type="text" class="field-input" id="initial2" maxlength="1" placeholder="S" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+          <div class="field-group"><label class="field-label">Middle Initial <span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$22</span></label><input type="text" class="field-input" id="initial2" maxlength="1" placeholder="—" oninput="updateMiddleInitial(this.value)" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
+          <div class="field-group"><label class="field-label">Last Initial</label><input type="text" class="field-input" id="initial3" maxlength="1" placeholder="S" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
         </div>
-        <p class="finish-note">A middle initial can be added in the notes field below.</p>
+        <p class="finish-note">Initials are engraved on the interior of the band. Middle initial adds $22.</p>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Ring Size (US)</label>
           <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;">
@@ -562,25 +572,24 @@
         <p class="finish-note">Unsure of your size? A sizing guide will be included in your confirmation email, or any jeweler can measure you in minutes at no charge.</p>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Notes</label>
-          <textarea class="field-input" id="notes" rows="3" placeholder="Additional requests, gift messaging, middle initial, or questions..."></textarea>
+          <textarea class="field-input" id="notes" rows="3" placeholder="Additional requests, gift messaging, or questions..."></textarea>
         </div>
         <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(5)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(7)">Review</button>
+          <button class="btn-nav btn-back" onclick="goStep(4)">&larr; Back</button>
+          <button class="btn-nav btn-next" onclick="goStep(6)">Review</button>
         </div>
       </div>
 
-      <!-- STEP 7 -->
-      <div class="wizard__panel" id="step-7">
+      <!-- STEP 6 -->
+      <div class="wizard__panel" id="step-6">
         <p class="panel-title">Your commission</p>
         <p class="panel-subtitle">Review before proceeding to payment.</p>
         <div id="natal-orrery-wrap-review"><p class="orrery-loading">✶ &nbsp; Your sky &nbsp; ✶</p></div>
-        <div class="unique-note">✦ This ring will be made once, for you alone. The planetary configuration it encodes will not recur in any human lifetime. There is no other ring like this one.</div>
+        <div class="unique-note">✦ Cast once, for you alone — the only ring in the world that carries this exact sky.</div>
         <div class="summary-block" id="order-summary">
           <div class="summary-row"><span class="summary-key">Birth</span><span class="summary-val" id="sum-birth">—</span></div>
           <div class="summary-row"><span class="summary-key">Tradition</span><span class="summary-val" id="sum-system">—</span></div>
           <div class="summary-row"><span class="summary-key">Metal</span><span class="summary-val" id="sum-metal">—</span></div>
-          <div class="summary-row"><span class="summary-key">Finish</span><span class="summary-val" id="sum-finish">—</span></div>
           <div class="summary-row"><span class="summary-key">Band</span><span class="summary-val" id="sum-band">—</span></div>
           <div class="summary-row"><span class="summary-key">Initials</span><span class="summary-val" id="sum-initials">—</span></div>
           <div class="summary-row"><span class="summary-key">Ring Size</span><span class="summary-val" id="sum-size">—</span></div>
@@ -588,7 +597,7 @@
         </div>
         <p style="font-size:.85rem; color:var(--muted); font-style:italic; margin-bottom:2rem;">Made by hand in America. Ships in two weeks. Fully insured.</p>
         <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(6)">&larr; Back</button>
+          <button class="btn-nav btn-back" onclick="goStep(5)">&larr; Back</button>
           <button class="btn-nav btn-commission" onclick="proceedToCheckout()">Commission This Ring &rarr;</button>
         </div>
         <p style="font-size:.78rem; color:var(--muted); text-align:center; margin-top:1.5rem; font-style:italic;">Secure payment via Stripe. SSL encrypted. Non-refundable once casting begins.</p>
@@ -728,7 +737,7 @@ document.querySelectorAll('.reveal').forEach(el=>{ el.classList.add('animated');
   container.appendChild(svg);
 })();
 
-const state={step:1,system:'western',metal:null,metalPrice:0,finish:null,band:null,bandExtra:0};
+const state={step:1,system:'western',metal:null,metalPrice:0,finish:null,band:null,bandExtra:0,middleInitial:'',middleExtra:0};
 
 function goStep(n){
   document.getElementById('step-'+state.step).classList.remove('active');
@@ -740,8 +749,7 @@ function goStep(n){
     else if(s<n) el.classList.add('done');
   });
   state.step=n;
-  if(n===4) updateFinishStep();
-  if(n===7) buildSummary();
+  if(n===6) buildSummary();
   window.scrollTo({top:document.getElementById('commission').offsetTop-80,behavior:'smooth'});
 }
 
@@ -764,67 +772,18 @@ function selectMetal(m,price){
   state.metal=m; state.metalPrice=price;
   metalIds.forEach(x=>{ const el=document.getElementById('metal-'+x); if(el) el.classList.remove('selected'); });
   document.getElementById('metal-'+m).classList.add('selected');
+  document.getElementById('btn-step3-continue').disabled = false;
 }
 
-function updateFinishStep(){
-  const note=document.getElementById('finish-note');
-  const sub=document.getElementById('finish-subtitle');
-  const isOxidizable=state.metal==='silver';
-  if(!isOxidizable){
-    sub.textContent='Polished finish.';
-    document.getElementById('finish-oxidized').style.display='none';
-    note.textContent=state.metal==='platinum'?'Platinum takes a mirror-bright polish and holds it permanently.':'Gold is available in polished finish.';
-  } else {
-    sub.textContent='Two ways to meet the light.';
-    document.getElementById('finish-oxidized').style.display='';
-    note.textContent='Oxidized sterling silver is treated with liver of sulfur. Recessed lines go dark. Raised planets catch the light.';
-  }
-}
-
-function selectFinish(f){
-  state.finish=f;
-  ['polished','oxidized'].forEach(x=>{ const el=document.getElementById('finish-'+x); if(el) el.classList.remove('selected'); });
-  const el=document.getElementById('finish-'+f); if(el) el.classList.add('selected');
+function updateMiddleInitial(val){
+  state.middleInitial = val ? val.toUpperCase() : '';
+  state.middleExtra = val && val.trim().length > 0 ? 22 : 0;
 }
 
 function selectBand(b){
   state.band=b; state.bandExtra=b==='diamond'?555:0;
   ['dream','moroccan','acanthus','diamond'].forEach(x=>document.getElementById('band-'+x).classList.remove('selected'));
   document.getElementById('band-'+b).classList.add('selected');
-}
-
-let _chartEmailSubmitted = false;
-
-async function submitChartEmail(){
-  const email = document.getElementById('chartEmail').value;
-  const msg = document.getElementById('chartEmailMsg');
-  const btn = document.getElementById('chartEmailBtn');
-  if(!email || !email.includes('@')){
-    msg.textContent = 'Please enter a valid email.';
-    msg.style.color = 'var(--muted)';
-    return;
-  }
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-  try {
-    const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
-    });
-    const data = await res.json();
-    if(data.subscription){
-      _chartEmailSubmitted = true;
-      document.getElementById('chartEmailGate').innerHTML =
-        '<p style="font-family:var(--cinzel);font-size:.62rem;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;padding:.5rem 0;">✦ &nbsp; Chart sent to ' + email + ' &nbsp; ✦</p>';
-      document.getElementById('btn-step2-continue').disabled = false;
-    } else { throw new Error(); }
-  } catch(err){
-    msg.textContent = 'Something went wrong. Please try again.';
-    msg.style.color = 'var(--muted)';
-    btn.textContent = 'Send My Chart';
-    btn.disabled = false;
-  }
 }
 
 const bandNames={dream:'Dream Portal',moroccan:'Moroccan Stars',acanthus:'Acanthus',diamond:'Stars & Diamonds'};
@@ -834,25 +793,26 @@ function buildSummary(){
   const bd=document.getElementById('birthdate').value;
   const bt=document.getElementById('birthtime').value;
   const bp=document.getElementById('birthplace').value;
-  const i1=document.getElementById('initial1').value.toUpperCase();
-  const i2=document.getElementById('initial2').value.toUpperCase();
+  const i1=(document.getElementById('initial1').value||'').toUpperCase();
+  const i2=(document.getElementById('initial2').value||'').toUpperCase();
+  const i3=(document.getElementById('initial3').value||'').toUpperCase();
   const sz=document.getElementById('ringsize').value;
   document.getElementById('sum-birth').textContent=[bd,bt,bp].filter(Boolean).join(' · ')||'—';
   document.getElementById('sum-system').textContent=state.system==='vedic'?'Vedic Sidereal (Lahiri)':'Western Tropical';
   document.getElementById('sum-metal').textContent=metalNames[state.metal]||'—';
-  document.getElementById('sum-finish').textContent=state.finish?(state.finish==='polished'?'Polished':'Oxidized'):'—';
   document.getElementById('sum-band').textContent=bandNames[state.band]||'—';
-  document.getElementById('sum-initials').textContent=(i1||i2)?(i1+(i2?' · '+i2:'')):'—';
+  let initialsDisplay = '';
+  if(i1||i3){ initialsDisplay = [i1,i2,i3].filter(Boolean).join(' · '); }
+  document.getElementById('sum-initials').textContent=initialsDisplay||'—';
   document.getElementById('sum-size').textContent=sz||'—';
-  const total=state.metalPrice+state.bandExtra;
+  const total=state.metalPrice+state.bandExtra+state.middleExtra;
   document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
   renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
 function proceedToCheckout(){
   if(!state.metal){ alert('Please select a metal in Step 3.'); return; }
-  if(!state.finish){ alert('Please select a finish in Step 4.'); return; }
-  if(!state.band){ alert('Please select a band in Step 5.'); return; }
+  if(!state.band){ alert('Please select a band in Step 4.'); return; }
   alert('Stripe integration coming soon. Your commission details have been recorded.');
 }
 
@@ -979,14 +939,9 @@ async function triggerNatalCalculation() {
 
     renderNatalChart(wrap, 'natal-planets-table', planets, houses, angles);
 
+    cont.disabled = false;
     btn.textContent = 'Recalculate';
     btn.disabled = false;
-    // Show email gate if not already submitted; if already submitted just re-enable Continue
-    if(document.getElementById('chartEmailGate').style.display !== 'none' || !_chartEmailSubmitted){
-      document.getElementById('chartEmailGate').style.display = 'block';
-    } else {
-      cont.disabled = false;
-    }
 
   } catch(e) {
     console.error('Chart calculation error:', e);
