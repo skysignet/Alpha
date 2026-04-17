@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Received — SkySignet by Jesse Sky</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #08090c;
+    --deep: #0d0f15;
+    --card: #12141c;
+    --border: rgba(196,160,90,0.18);
+    --gold: #c4a05a;
+    --gold-light: #e8d08a;
+    --gold-dim: rgba(196,160,90,0.45);
+    --cream: #f0e8d5;
+    --text: #d8cfc0;
+    --muted: #7a7468;
+    --cinzel: 'Cinzel', 'Palatino Linotype', serif;
+    --cormorant: 'Cormorant Garamond', Georgia, serif;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--cormorant);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  canvas#starfield { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 620px;
+    width: 100%;
+    animation: fadeUp 1s ease .2s both;
+  }
+
+  .sigil {
+    font-size: 2.4rem;
+    color: var(--gold);
+    opacity: .7;
+    margin-bottom: 1.5rem;
+    display: block;
+    animation: pulse 3s ease infinite;
+  }
+
+  .eyebrow {
+    font-family: var(--cinzel);
+    font-size: .58rem;
+    letter-spacing: .45em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: var(--cinzel);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: .06em;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+
+  .body-text {
+    font-size: 1.1rem;
+    color: var(--text);
+    line-height: 2.1;
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    text-align: left;
+  }
+
+  .card-label {
+    font-family: var(--cinzel);
+    font-size: .56rem;
+    letter-spacing: .3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    display: block;
+    text-align: center;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: .55rem 0;
+    border-bottom: 1px solid rgba(196,160,90,.08);
+    font-size: .95rem;
+    gap: 1rem;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-key {
+    font-family: var(--cinzel);
+    font-size: .56rem;
+    letter-spacing: .18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .detail-val {
+    color: var(--cream);
+    font-style: italic;
+    text-align: right;
+  }
+
+  .next-steps {
+    background: rgba(196,160,90,.03);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold);
+    padding: 1.5rem 1.8rem;
+    text-align: left;
+    margin-bottom: 2.5rem;
+  }
+  .next-steps p {
+    font-family: var(--cinzel);
+    font-size: .56rem;
+    letter-spacing: .3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: .9rem;
+  }
+  .next-steps ul {
+    list-style: none;
+    padding: 0;
+  }
+  .next-steps li {
+    font-size: .95rem;
+    color: var(--muted);
+    font-style: italic;
+    padding: .4rem 0;
+    line-height: 1.8;
+  }
+  .next-steps li::before {
+    content: '✦  ';
+    color: var(--gold);
+    font-style: normal;
+    font-size: .6rem;
+  }
+
+  .contact-line {
+    font-family: var(--cinzel);
+    font-size: .56rem;
+    letter-spacing: .22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .contact-line a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .contact-line a:hover { color: var(--gold-light); }
+
+  .btn-return {
+    display: inline-block;
+    font-family: var(--cinzel);
+    font-size: .65rem;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    border: none;
+    padding: 1rem 2.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .3s, transform .2s;
+  }
+  .btn-return:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+  .footer-brand {
+    margin-top: 3rem;
+    font-family: var(--cinzel);
+    font-size: .52rem;
+    letter-spacing: .35em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(18px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: .7; }
+    50%       { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="wrap">
+  <span class="sigil">✦</span>
+  <p class="eyebrow">Commission Received</p>
+  <h1>Your SkySignet<br>is on its way</h1>
+  <p class="body-text">
+    Your commission has been received and your payment is confirmed.<br>
+    Jesse will be in touch within one business day to confirm every detail before casting begins.
+  </p>
+
+  <div class="card" id="order-details" style="display:none;">
+    <span class="card-label">✦ Your Commission ✦</span>
+    <div id="order-rows"></div>
+  </div>
+
+  <div class="next-steps">
+    <p>✦ What Happens Next ✦</p>
+    <ul>
+      <li>You will receive a confirmation email from Stripe with your receipt.</li>
+      <li>Jesse will email you within one business day to confirm your order details.</li>
+      <li>Your chart is reviewed and the ring file is prepared for casting.</li>
+      <li>Lost wax casting and hand finishing takes approximately two weeks.</li>
+      <li>Your ring ships fully insured with a certificate of provenance.</li>
+    </ul>
+  </div>
+
+  <p class="contact-line">Questions? <a href="mailto:jesseskydesign@gmail.com">jesseskydesign@gmail.com</a></p>
+
+  <a href="https://skysignet.co" class="btn-return">Return to SkySignet</a>
+
+  <p class="footer-brand">SkySignet &nbsp;·&nbsp; Jesse Sky &nbsp;·&nbsp; Lotus Research &amp; Design, LLC</p>
+</div>
+
+<script>
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function resizeCanvas(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+function initStars(){
+  stars=[];
+  for(let i=0;i<280;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.1,o:Math.random()*.4+.04,pulse:Math.random()*Math.PI*2});
+}
+function drawStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const t=Date.now()*.0007;
+  stars.forEach(s=>{
+    const op=s.o*(0.55+0.45*Math.sin(t+s.pulse));
+    ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(215,195,155,${op})`; ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+resizeCanvas(); initStars(); drawStars();
+window.addEventListener('resize',()=>{ resizeCanvas(); initStars(); });
+
+// Pull readable order details out of URL params (passed through from Stripe metadata via session)
+// Since we don't want to expose the secret key on the frontend, we just show what we know from the URL
+// Stripe sends back ?session_id=... — we display a static confirmation only.
+// (Optional: add a /api/session-details endpoint later to fetch and display order specifics.)
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('session_id');
+if(sessionId){
+  const card = document.getElementById('order-details');
+  const rows = document.getElementById('order-rows');
+  rows.innerHTML = `
+    <div class="detail-row">
+      <span class="detail-key">Confirmation</span>
+      <span class="detail-val" style="font-size:.8rem; letter-spacing:.05em;">${sessionId.slice(0,24)}…</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-key">Status</span>
+      <span class="detail-val">Payment confirmed</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-key">Fulfillment</span>
+      <span class="detail-val">Jesse will contact you within one business day</span>
+    </div>
+  `;
+  card.style.display = '';
+}
+</script>
+</body>
+</html>

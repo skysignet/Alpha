@@ -768,10 +768,67 @@ function buildSummary(){
   renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
-function proceedToCheckout(){
+const METAL_TO_TIER = {
+  'silver':    'silver',
+  'silver-pd': 'silver_pd',
+  'gold14':    '14k',
+  'gold18':    '18k',
+  'platinum':  'platinum',
+  'bronze':    'bronze'
+};
+const BAND_TO_KEY = {
+  'dream':    'dream_portal',
+  'moroccan': 'moroccan_stars',
+  'acanthus': 'acanthus',
+  'diamond':  'stars_and_diamonds'
+};
+
+async function proceedToCheckout(){
   if(!state.metal){ alert('Please select a metal in Step 3.'); return; }
   if(!state.band){ alert('Please select a band in Step 4.'); return; }
-  alert('Stripe integration coming soon. Your commission details have been recorded.');
+
+  const btn = document.getElementById('btn-checkout');
+  const originalText = btn.textContent;
+  btn.textContent = 'Preparing your commission…';
+  btn.disabled = true;
+
+  const bd = document.getElementById('birthdate').value;
+  const bt = document.getElementById('birthtime').value;
+  const bp = document.getElementById('birthplace').value;
+  const sz = document.getElementById('ringsize') ? document.getElementById('ringsize').value : '';
+  const i1 = (document.getElementById('initial1') ? document.getElementById('initial1').value : '').toUpperCase();
+  const i2 = (document.getElementById('initial2') ? document.getElementById('initial2').value : '').toUpperCase();
+  const i3 = (document.getElementById('initial3') ? document.getElementById('initial3').value : '').toUpperCase();
+
+  const payload = {
+    tier:      METAL_TO_TIER[state.metal] || state.metal,
+    band:      BAND_TO_KEY[state.band] || state.band,
+    birthdate: bd,
+    birthtime: bt,
+    birthplace: bp,
+    ring_size:  sz,
+    initials:   [i1,i2,i3].filter(Boolean).join('·'),
+    tradition:  state.system
+  };
+
+  try {
+    const res = await fetch('https://alpha-production-1b1b.up.railway.app/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(data.url){
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'No checkout URL returned');
+    }
+  } catch(err){
+    console.error('Checkout error:', err);
+    btn.textContent = originalText;
+    btn.disabled = false;
+    alert('Something went wrong initiating checkout. Please try again or email jesseskydesign@gmail.com');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
