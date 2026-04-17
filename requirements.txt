@@ -1,0 +1,5 @@
+pyswisseph==2.10.3.2
+python-dateutil==2.9.0
+pytz==2024.1
+flask==3.0.3
+stripe==8.11.0
