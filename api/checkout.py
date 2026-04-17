@@ -1,55 +1,79 @@
 """
 SkySignet Checkout API — Stripe + Flask
 Railway server: /api/checkout
-
 POST /api/checkout
 Body JSON:
-  tier   silver | silver_pd | 14k | 18k | platinum
-  band   (optional) dream_portal | moroccan_stars | acanthus | stars_and_diamonds
+  tier       bronze | silver | silver_pd | 14k | 18k | platinum
+  band       (optional) dream_portal | moroccan_stars | acanthus | stars_and_diamonds
+  birthdate  (optional) e.g. 1985-03-21
+  birthtime  (optional) e.g. 14:30
+  birthplace (optional) e.g. Boulder, CO
+  ring_size  (optional) e.g. 8.5
+  initials   (optional) e.g. J·W·P
+  tradition  (optional) western | vedic
 """
-
 import json
 import os
 import stripe
 from flask import Flask, request as flask_request, Response
 
 app = Flask(__name__)
-
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
 TIERS = {
-    "silver":     {"name": "SkySignet — Sterling Silver",         "price": 88800},
-    "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price": 111100},
-    "14k":        {"name": "SkySignet — 14k Gold",                "price": 333300},
-    "18k":        {"name": "SkySignet — 18k Gold",                "price": 444400},
-    "platinum":   {"name": "SkySignet — Platinum",                "price": 888800},
+    "bronze":     {"name": "SkySignet — Bronze",                  "price":  55500},
+    "silver":     {"name": "SkySignet — Sterling Silver",         "price": 111100},
+    "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price": 133300},
+    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price": 555500},
+    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price": 777700},
+    "platinum":   {"name": "SkySignet — Platinum",                "price": None},   # price on request
 }
 
 BAND_ADDON = {
-    "dream_portal":     "Dream Portal Band",
-    "moroccan_stars":   "Moroccan Stars Band",
-    "acanthus":         "Acanthus Band",
-    "stars_and_diamonds": "Stars & Diamonds Band",
+    "dream_portal":       "Dream Portal Band (+$555)",
+    "moroccan_stars":     "Moroccan Stars Band (+$555)",
+    "acanthus":           "Acanthus Band (+$555)",
+    "stars_and_diamonds": "Stars & Diamonds Band (+$555)",
 }
-
 BAND_PRICE = 55500  # $555.00
-
 
 @app.route('/api/checkout', methods=['POST'])
 def checkout():
     try:
         data = flask_request.get_json(force=True)
-        tier = data.get("tier", "").lower()
-        band = data.get("band", "").lower()
+        tier      = data.get("tier", "").lower()
+        band      = data.get("band", "").lower()
+        birthdate = data.get("birthdate", "")
+        birthtime = data.get("birthtime", "")
+        birthplace = data.get("birthplace", "")
+        ring_size  = data.get("ring_size", "")
+        initials   = data.get("initials", "")
+        tradition  = data.get("tradition", "western")
 
         if tier not in TIERS:
             raise ValueError(f"Invalid tier: {tier}")
+
+        if TIERS[tier]["price"] is None:
+            raise ValueError("Platinum is priced on request — please email jesseskydesign@gmail.com")
+
+        # Build description for the Stripe line item
+        details = []
+        if birthdate:  details.append(f"Born {birthdate}")
+        if birthtime:  details.append(birthtime)
+        if birthplace: details.append(birthplace)
+        if tradition:  details.append("Vedic Sidereal" if tradition == "vedic" else "Western Tropical")
+        if ring_size:  details.append(f"Size {ring_size}")
+        if initials:   details.append(f"Initials: {initials}")
+        description = " · ".join(details) if details else "Bespoke natal chart signet ring"
 
         line_items = [{
             "price_data": {
                 "currency": "usd",
                 "unit_amount": TIERS[tier]["price"],
-                "product_data": {"name": TIERS[tier]["name"]},
+                "product_data": {
+                    "name": TIERS[tier]["name"],
+                    "description": description,
+                },
             },
             "quantity": 1,
         }]
@@ -68,8 +92,18 @@ def checkout():
             payment_method_types=["card"],
             line_items=line_items,
             mode="payment",
-            success_url="https://skysignet.vercel.app/success",
-            cancel_url="https://skysignet.vercel.app/#commission",
+            metadata={
+                "tier":       tier,
+                "band":       band or "none",
+                "birthdate":  birthdate,
+                "birthtime":  birthtime,
+                "birthplace": birthplace,
+                "ring_size":  ring_size,
+                "initials":   initials,
+                "tradition":  tradition,
+            },
+            success_url="https://skysignet.co/success.html?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://skysignet.co/#commission",
         )
 
         body = json.dumps({"url": session.url})
