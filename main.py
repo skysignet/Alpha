@@ -1,11 +1,12 @@
 """
 SkySignet API — main entry point
-Combines /api/calculate and /api/checkout into one Flask app
+Combines /api/calculate, /api/checkout, and /api/send-chart into one Flask app
 """
 import os
-from flask import Flask, request
+from flask import Flask
 from api.calculate import app as calculate_app
 from api.checkout import app as checkout_app
+from api.send_chart import send_chart_bp
 
 app = Flask(__name__)
 
@@ -16,7 +17,7 @@ def add_cors(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
-# Register all routes from both modules
+# Register all routes from calculate and checkout modules
 for rule in calculate_app.url_map.iter_rules():
     app.add_url_rule(
         rule.rule,
@@ -31,6 +32,9 @@ for rule in checkout_app.url_map.iter_rules():
         view_func=checkout_app.view_functions[rule.endpoint],
         methods=rule.methods
     )
+
+# Register send-chart blueprint
+app.register_blueprint(send_chart_bp)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
