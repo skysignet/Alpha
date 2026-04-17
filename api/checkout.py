@@ -20,13 +20,20 @@ from flask import Flask, request as flask_request, Response
 app = Flask(__name__)
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
+@app.after_request
+def add_cors(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
 TIERS = {
     "bronze":     {"name": "SkySignet — Bronze",                  "price":  55500},
     "silver":     {"name": "SkySignet — Sterling Silver",         "price": 111100},
     "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price": 133300},
     "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price": 555500},
     "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price": 777700},
-    "platinum":   {"name": "SkySignet — Platinum",                "price": None},   # price on request
+    "platinum":   {"name": "SkySignet — Platinum",                "price": None},
 }
 
 BAND_ADDON = {
@@ -37,14 +44,17 @@ BAND_ADDON = {
 }
 BAND_PRICE = 55500  # $555.00
 
-@app.route('/api/checkout', methods=['POST'])
+@app.route('/api/checkout', methods=['POST', 'OPTIONS'])
 def checkout():
+    if flask_request.method == 'OPTIONS':
+        return Response("", status=200)
+
     try:
         data = flask_request.get_json(force=True)
-        tier      = data.get("tier", "").lower()
-        band      = data.get("band", "").lower()
-        birthdate = data.get("birthdate", "")
-        birthtime = data.get("birthtime", "")
+        tier       = data.get("tier", "").lower()
+        band       = data.get("band", "").lower()
+        birthdate  = data.get("birthdate", "")
+        birthtime  = data.get("birthtime", "")
         birthplace = data.get("birthplace", "")
         ring_size  = data.get("ring_size", "")
         initials   = data.get("initials", "")
@@ -56,7 +66,6 @@ def checkout():
         if TIERS[tier]["price"] is None:
             raise ValueError("Platinum is priced on request — please email jesseskydesign@gmail.com")
 
-        # Build description for the Stripe line item
         details = []
         if birthdate:  details.append(f"Born {birthdate}")
         if birthtime:  details.append(birthtime)
@@ -113,14 +122,4 @@ def checkout():
         body = json.dumps({"error": str(e)})
         status = 400
 
-    return Response(body, status=status, mimetype='application/json',
-                    headers={"Access-Control-Allow-Origin": "*"})
-
-
-@app.route('/api/checkout', methods=['OPTIONS'])
-def checkout_options():
-    return Response("", status=200, headers={
-        "Access-Control-Allow-Origin":  "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-    })
+    return Response(body, status=status, mimetype='application/json')
