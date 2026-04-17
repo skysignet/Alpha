@@ -393,7 +393,7 @@
     <div class="configurator__header reveal">
       <span class="section-label">✦ Commission Yours ✦</span>
       <h2 class="section-title">Create Your SkySignet Ring</h2>
-      <p style="color:var(--muted); font-style:italic;">No two are the same. Bespoke 1/1.</p>
+      <p style="color:var(--muted); font-style:italic;">Made once. For one person. For always.</p>
     </div>
 
     <!-- wizard opens directly; email collected after chart renders in step 2 -->
@@ -451,7 +451,7 @@
             </div>
             <p class="kit-form__msg" id="chartEmailMsg"></p>
           </div>
-          <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">No spam. No sharing. Your chart belongs to you.</p>
+          <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">Your birth data is held in confidence and never shared.</p>
         </div>
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
@@ -1149,7 +1149,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     if (lon === undefined) continue;
     t += '<tr>';
     t += '<td>' + pd.glyph + ' ' + pd.label + '</td>';
-    t += '<td><span style="font-family:\'Starsigns\',serif;font-size:1.1em;vertical-align:middle;">' + signGlyph(lon) + '</span> ' + signName(lon) + '</td>';
+    t += '<td><span style="font-family:\'Starsigns\',serif;font-size:1.1em;vertical-align:middle;font-variant-emoji:text;">' + signGlyph(lon) + '\uFE0E</span> ' + signName(lon) + '</td>';
     t += '<td>' + degInSign(lon) + '\u00b0</td>';
     t += '</tr>';
   }
@@ -1158,7 +1158,7 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
     t += '<tr><td colspan="3" class="natal-section-label">House Cusps \u00b7 Placidus</td></tr>';
     const hLabels = ['I \u2014 Asc','II','III','IV \u2014 IC','V','VI','VII \u2014 Dsc','VIII','IX','X \u2014 MC','XI','XII'];
     for (let h = 0; h < 12; h++) {
-      t += '<tr><td>' + hLabels[h] + '</td><td><span style="font-family:\'Starsigns\',serif;font-size:1.1em;vertical-align:middle;">' + signGlyph(houses[h]) + '</span> ' + signName(houses[h]) + '</td><td>' + degInSign(houses[h]) + '\u00b0</td></tr>';
+      t += '<tr><td>' + hLabels[h] + '</td><td><span style="font-family:\'Starsigns\',serif;font-size:1.1em;vertical-align:middle;font-variant-emoji:text;">' + signGlyph(houses[h]) + '\uFE0E</span> ' + signName(houses[h]) + '</td><td>' + degInSign(houses[h]) + '\u00b0</td></tr>';
     }
   } else if (!(_natalCache && _natalCache.hasGeo)) {
     t += '<tr><td colspan="3" style="font-size:.52rem;font-family:var(--cinzel);letter-spacing:.14em;color:var(--muted);padding:.7rem .8rem;font-style:italic;">Add birthplace in Step 1 for house cusps</td></tr>';
