@@ -701,28 +701,40 @@ let _chartEmailSubmitted = false;
 
 async function submitChartEmail(){
   const email = document.getElementById('chartEmail').value;
-  const msg = document.getElementById('chartEmailMsg');
-  const btn = document.getElementById('chartEmailBtn');
+  const msg   = document.getElementById('chartEmailMsg');
+  const btn   = document.getElementById('chartEmailBtn');
   if(!email || !email.includes('@')){
     msg.textContent = 'Please enter a valid email.';
+    msg.style.color = 'var(--muted)';
+    return;
+  }
+  if(!_natalCache){
+    msg.textContent = 'Please calculate your chart first.';
     msg.style.color = 'var(--muted)';
     return;
   }
   btn.textContent = 'Sending...';
   btn.disabled = true;
   try {
-    const res = await fetch('https://api.convertkit.com/v3/forms/9316718/subscribe', {
+    const res = await fetch('https://alpha-production-1b1b.up.railway.app/api/send-chart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ api_key: 'pyZITPId6tnQka9Oaza_wA', email: email })
+      body: JSON.stringify({
+        email:  email,
+        date:   document.getElementById('birthdate').value,
+        time:   document.getElementById('birthtime').value,
+        place:  document.getElementById('birthplace').value,
+        system: state.system,
+        chart:  _natalCache
+      })
     });
     const data = await res.json();
-    if(data.subscription){
+    if(data.ok){
       _chartEmailSubmitted = true;
       document.getElementById('chartEmailGate').innerHTML =
         '<p style="font-family:var(--cinzel);font-size:.62rem;letter-spacing:.28em;color:var(--gold);text-transform:uppercase;padding:.5rem 0;">✦ &nbsp; Chart sent to ' + email + ' &nbsp; ✦</p>';
       document.getElementById('btn-step2-continue').disabled = false;
-    } else { throw new Error(); }
+    } else { throw new Error(data.error || 'Send failed'); }
   } catch(err){
     msg.textContent = 'Something went wrong. Please try again.';
     msg.style.color = 'var(--muted)';
