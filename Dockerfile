@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+# v2
 RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     sqlite3 \
@@ -11,4 +12,4 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --no-binary pyswisseph -r requirements.txt
 COPY . .
 EXPOSE 8080
-CMD ["python", "main.py"]
+CMD ["python", "/app/main.py"]
