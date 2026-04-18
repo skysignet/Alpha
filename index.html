@@ -699,6 +699,59 @@ function selectBand(b){
 
 let _chartEmailSubmitted = false;
 
+async function captureSvgAsPng() {
+  const svgEl = document.querySelector('#natal-orrery-wrap .natal-orrery-container svg');
+  if (!svgEl) return null;
+
+  // Clone SVG and inject the Starsigns @font-face so canvas gets the font
+  const clone = svgEl.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+  let fontFaceRule = '';
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        if (rule instanceof CSSFontFaceRule && rule.style.getPropertyValue('font-family').includes('Starsigns')) {
+          fontFaceRule = rule.cssText;
+          break;
+        }
+      }
+    } catch(e) {}
+    if (fontFaceRule) break;
+  }
+
+  if (fontFaceRule) {
+    let defs = clone.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      clone.prepend(defs);
+    }
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = fontFaceRule;
+    defs.appendChild(style);
+  }
+
+  const svgData = new XMLSerializer().serializeToString(clone);
+  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = 520; c.height = 520;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#08090c';
+      ctx.fillRect(0, 0, 520, 520);
+      ctx.drawImage(img, 0, 0, 520, 520);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/png').replace('data:image/png;base64,', ''));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('SVG capture failed')); };
+    img.src = url;
+  });
+}
+
 async function submitChartEmail(){
   const email = document.getElementById('chartEmail').value;
   const msg   = document.getElementById('chartEmailMsg');
@@ -716,16 +769,20 @@ async function submitChartEmail(){
   btn.textContent = 'Sending...';
   btn.disabled = true;
   try {
+    const chart_image = await captureSvgAsPng();
+    if (!chart_image) throw new Error('Could not capture chart image');
+
     const res = await fetch('https://alpha-production-1b1b.up.railway.app/api/send-chart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email:  email,
-        date:   document.getElementById('birthdate').value,
-        time:   document.getElementById('birthtime').value,
-        place:  document.getElementById('birthplace').value,
-        system: state.system,
-        chart:  _natalCache
+        email:       email,
+        date:        document.getElementById('birthdate').value,
+        time:        document.getElementById('birthtime').value,
+        place:       document.getElementById('birthplace').value,
+        system:      state.system,
+        chart:       _natalCache,
+        chart_image: chart_image
       })
     });
     const data = await res.json();
