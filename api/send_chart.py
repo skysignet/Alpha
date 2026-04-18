@@ -105,8 +105,13 @@ def render_orrery_svg(chart, size=520):
     # Node ring
     s += f'<circle cx="{cx}" cy="{cy}" r="{NODE_R:.1f}" fill="none" stroke="rgba(196,160,90,0.18)" stroke-width="0.7" stroke-dasharray="3,3"/>'
 
-    # House spokes
-    cusps = houses.get('cusps', []) if houses else []
+    # House spokes — handle both dict {'cusps': [...]} and raw list
+    if isinstance(houses, dict):
+        cusps = houses.get('cusps', [])
+    elif isinstance(houses, list):
+        cusps = houses
+    else:
+        cusps = []
     if cusps and len(cusps) >= 13:
         for h in range(1, 13):
             a = lon_to_rad(cusps[h], north_lon)
