@@ -731,6 +731,14 @@ async function captureSvgAsPng() {
     defs.appendChild(style);
   }
 
+  // Expand viewBox by PAD on every side so overflow:visible nodes aren't clipped by drawImage
+  const PAD = 40;
+  const vb = (clone.getAttribute('viewBox') || '0 0 420 420').split(' ').map(Number);
+  const [vx, vy, vw, vh] = vb;
+  clone.setAttribute('viewBox', `${vx - PAD} ${vy - PAD} ${vw + PAD * 2} ${vh + PAD * 2}`);
+  clone.setAttribute('width',  vw + PAD * 2);
+  clone.setAttribute('height', vh + PAD * 2);
+
   const svgData = new XMLSerializer().serializeToString(clone);
   const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
   const url = URL.createObjectURL(svgBlob);
@@ -739,11 +747,11 @@ async function captureSvgAsPng() {
     const img = new Image();
     img.onload = () => {
       const c = document.createElement('canvas');
-      c.width = 520; c.height = 520;
+      c.width = vw + PAD * 2; c.height = vh + PAD * 2;
       const ctx = c.getContext('2d');
       ctx.fillStyle = '#08090c';
-      ctx.fillRect(0, 0, 520, 520);
-      ctx.drawImage(img, 0, 0, 520, 520);
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
       URL.revokeObjectURL(url);
       resolve(c.toDataURL('image/png').replace('data:image/png;base64,', ''));
     };
