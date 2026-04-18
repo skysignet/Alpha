@@ -76,7 +76,7 @@ def planet_rows_html(chart):
 
 # ── HTML email template ──────────────────────────────────────────────────────
 
-def build_email_html(chart, birthdate, birthplace, system_label):
+def build_email_html(chart, birthdate, birthtime, birthplace, system_label):
     planet_rows = planet_rows_html(chart)
     asc  = chart.get('angles', {}).get('ascendant', {})
     asc_str = f"{asc.get('sign','—')} {asc.get('deg_in_sign',0):.1f}°" if asc else '—'
@@ -112,9 +112,9 @@ def build_email_html(chart, birthdate, birthplace, system_label):
   <!-- Intro -->
   <tr>
     <td style="padding:0 0 32px;">
-      <p style="margin:0 0 16px;font-size:17px;line-height:1.9;color:#d8cfc0;">Here is your natal chart — the precise configuration of the planets at the moment of your arrival.</p>
+      <p style="margin:0 0 16px;font-size:17px;line-height:1.9;color:#d8cfc0;">Here is your natal chart — the precise configuration of the visible luminaries at the moment of your arrival.</p>
       <p style="margin:0;font-size:15px;line-height:1.9;color:#7a7468;font-style:italic;">
-        {birthplace}{(' · ' + birthdate) if birthdate else ''}<br>
+        {' | '.join(filter(None, [birthdate, birthtime, birthplace]))}<br>
         Ascendant: {asc_str} &nbsp;·&nbsp; {tradition}
       </p>
     </td>
@@ -145,7 +145,7 @@ def build_email_html(chart, birthdate, birthplace, system_label):
   <tr>
     <td align="center" style="padding:0 0 48px;">
       <p style="margin:0 0 8px;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;color:#c4a05a;text-transform:uppercase;">✦ &nbsp; Commission Yours &nbsp; ✦</p>
-      <p style="margin:0 0 28px;font-size:16px;line-height:1.9;color:#d8cfc0;max-width:420px;">This configuration has never been cast before. It belongs to no one else. Continue your commission to have it rendered in metal.</p>
+      <p style="margin:0 0 28px;font-size:16px;line-height:1.9;color:#d8cfc0;max-width:420px;">This is a one-of-one configuration. No one else has had it cast. Proceed to commission it in precious metal.</p>
       <a href="{cta_url}" style="display:inline-block;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#08090c;background:#c4a05a;text-decoration:none;padding:16px 40px;">Continue Your Commission</a>
     </td>
   </tr>
@@ -202,7 +202,7 @@ def send_chart():
 
         system_label = 'Vedic Sidereal' if system == 'vedic' else 'Western Tropical'
 
-        html_body = build_email_html(chart, birthdate, birthplace, system_label)
+        html_body = build_email_html(chart, birthdate, birthtime, birthplace, system_label)
 
         payload = {
             'from':    'SkySignet <info@skysignet.co>',
