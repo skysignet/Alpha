@@ -37,6 +37,13 @@ ZODIAC_GLYPHS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','�
 ZODIAC_NAMES  = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
                  'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces']
 
+def _load_starsigns_b64():
+    font_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Starsigns-Regular.otf')
+    with open(font_path, 'rb') as f:
+        return base64.b64encode(f.read()).decode('ascii')
+
+_STARSIGNS_B64 = _load_starsigns_b64()
+
 PLANET_DEFS = [
     {'key':'sun',     'label':'Sun',     'glyph':'☉', 'color':'#e8d08a', 'ringFrac':0.38, 'big':True},
     {'key':'moon',    'label':'Moon',    'glyph':'☽', 'color':'#d8cfc0', 'ringFrac':0.32, 'big':True},
@@ -74,6 +81,16 @@ def render_orrery_svg(chart, size=520):
 
     s = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {size} {size}" width="{size}" height="{size}">'
 
+    # Embed Starsigns font so cairosvg can render zodiac/planet glyphs
+    s += (
+        '<defs><style>'
+        '@font-face{'
+        'font-family:\'Starsigns\';'
+        f'src:url(\'data:font/otf;base64,{_STARSIGNS_B64}\') format(\'opentype\');'
+        'font-weight:normal;font-style:normal;}'
+        '</style></defs>'
+    )
+
     # Background
     s += f'<rect width="{size}" height="{size}" fill="#08090c"/>'
     s += f'<circle cx="{cx}" cy="{cy}" r="{R*1.02}" fill="#0d0f15" stroke="#c4a05a" stroke-width="0.8" stroke-opacity="0.3"/>'
@@ -95,7 +112,7 @@ def render_orrery_svg(chart, size=520):
         gr = (ZO + ZI) / 2
         gx = cx + math.cos(mid_a) * gr; gy = cy + math.sin(mid_a) * gr
         fs = size * 0.028
-        s += f'<text x="{gx:.1f}" y="{gy:.1f}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.6)" font-size="{fs:.1f}" font-family="serif">{ZODIAC_GLYPHS[i]}</text>'
+        s += f'<text x="{gx:.1f}" y="{gy:.1f}" text-anchor="middle" dominant-baseline="central" fill="rgba(196,160,90,0.6)" font-size="{fs:.1f}" font-family="Starsigns,serif">{ZODIAC_GLYPHS[i]}</text>'
 
     # Orbital rings
     for p in PLANET_DEFS:
@@ -128,7 +145,7 @@ def render_orrery_svg(chart, size=520):
     for a, glyph, color in [(na, '☊', '#c4a05a'), (sa, '☋', '#9090a8')]:
         nx = cx + math.cos(a) * NODE_R; ny = cy + math.sin(a) * NODE_R
         s += f'<circle cx="{nx:.1f}" cy="{ny:.1f}" r="{ns*0.8:.1f}" fill="rgba(8,9,12,0.7)"/>'
-        s += f'<text x="{nx:.1f}" y="{ny:.1f}" text-anchor="middle" dominant-baseline="central" fill="{color}" font-size="{ns:.1f}" font-family="serif" opacity="0.9">{glyph}</text>'
+        s += f'<text x="{nx:.1f}" y="{ny:.1f}" text-anchor="middle" dominant-baseline="central" fill="{color}" font-size="{ns:.1f}" font-family="Starsigns,serif" opacity="0.9">{glyph}</text>'
 
     # Planets
     FP = size * 0.038
@@ -143,7 +160,7 @@ def render_orrery_svg(chart, size=520):
         py  = cy + math.sin(a) * r
         fs  = FP if p['big'] else FP * 0.85
         s += f'<circle cx="{px:.1f}" cy="{py:.1f}" r="{fs*0.7:.1f}" fill="rgba(8,9,12,0.75)"/>'
-        s += f'<text x="{px:.1f}" y="{py:.1f}" text-anchor="middle" dominant-baseline="central" fill="{p["color"]}" font-size="{fs:.1f}" font-family="serif" opacity="0.97">{p["glyph"]}</text>'
+        s += f'<text x="{px:.1f}" y="{py:.1f}" text-anchor="middle" dominant-baseline="central" fill="{p["color"]}" font-size="{fs:.1f}" font-family="Starsigns,serif" opacity="0.97">{p["glyph"]}</text>'
 
     # ASC / MC markers
     asc_lon = angles.get('ascendant', {}).get('lon') if angles else None
