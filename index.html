@@ -245,8 +245,8 @@
   }
   #btn-calculate-chart:hover { border-color: var(--gold); background: rgba(196,160,90,.06); }
   #btn-calculate-chart.visible { display: block; }
-  #btn-step2-continue { transition: opacity .4s, background .3s; }
-  #btn-step2-continue:disabled { opacity: .35; cursor: default; background: var(--gold); transform: none; }
+  #btn-step2-continue, #btn-step5-continue { transition: opacity .4s, background .3s; }
+  #btn-step2-continue:disabled, #btn-step5-continue:disabled { opacity: .35; cursor: default; background: var(--gold); transform: none; }
 
   @media(max-width:640px){
     .option-grid { grid-template-columns:1fr 1fr; }
@@ -457,6 +457,7 @@
             <p class="kit-form__msg" id="chartEmailMsg"></p>
           </div>
           <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">Your birth data is held in confidence and never shared.</p>
+          <p style="margin-top:1.25rem;"><a href="#" onclick="skipChartEmail();return false;" style="font-size:.88rem; color:var(--muted); text-decoration:underline; cursor:pointer;">Continue without sending</a></p>
         </div>
         <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
           <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
@@ -548,7 +549,7 @@
         </div>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Ring Size (US)</label>
-          <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;">
+          <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;" oninput="document.getElementById('btn-step5-continue').disabled=!this.value.trim()">
         </div>
         <p class="finish-note">Unsure of your size? A sizing guide will be included in your confirmation email, or any jeweler can measure you in minutes at no charge.</p>
         <div class="field-group" style="margin-top:1.5rem;">
@@ -557,7 +558,7 @@
         </div>
         <div class="wizard__nav wizard__nav--split">
           <button class="btn-nav btn-back" onclick="goStep(4)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(6)">Review</button>
+          <button class="btn-nav btn-next" id="btn-step5-continue" onclick="goStep(6)" disabled>Review</button>
         </div>
       </div>
 
@@ -685,6 +686,13 @@ function toggleInitials(checked){
   } else {
     state.middleExtra = 33;
   }
+}
+
+function skipChartEmail(){
+  _chartEmailSubmitted = true;
+  document.getElementById('btn-step2-continue').disabled = false;
+  document.getElementById('chartEmailGate').style.opacity = '0.4';
+  document.getElementById('chartEmailGate').style.pointerEvents = 'none';
 }
 
 function updateMiddleInitial(val){
