@@ -270,7 +270,7 @@
     </div>
     <h1 class="hero__title">SkySignet</h1>
     <p class="hero__tagline">A map of the sky on the day you were born, worn on your hand</p>
-    <p class="hero__subtitle">Cast in bronze, silver, or gold.<br>Completely bespoke.<br>Designed and made in America.</p>
+    <p class="hero__subtitle">Cast in silver, gold, or platinum.<br>Completely bespoke.<br>Designed and made in America.</p>
     <div class="hero__image-placeholder">
       <img src="hero.jpg" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
     </div>
@@ -470,29 +470,29 @@
         <p class="panel-title">Choose your metal</p>
         <p class="panel-subtitle">Each carries its own weight and quality of light. All metals responsibly sourced and recycled.</p>
     <div class="option-grid">
-          <div class="option-card" onclick="selectMetal('bronze',555)" id="metal-bronze">
+          <div class="option-card" onclick="selectMetal('silver',1480)" id="metal-silver">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Bronze</p><p class="option-card__desc">Ancient. Warm. The metal of the first great civilizations.</p><p class="option-card__price">$555</p>
+            <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar. Classic. The metal of maps and mirrors.</p><p class="option-card__price">$1,480</p>
           </div>
-          <div class="option-card" onclick="selectMetal('silver',1111)" id="metal-silver">
+          <div class="option-card" onclick="selectMetal('silver-pd',1680)" id="metal-silver-pd">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar. Classic. The metal of maps and mirrors.</p><p class="option-card__price">$1,111</p>
+            <p class="option-card__name">Silver / Palladium</p><p class="option-card__desc">Harder, whiter, more resistant to tarnish.</p><p class="option-card__price">$1,680</p>
           </div>
-          <div class="option-card" onclick="selectMetal('silver-pd',1333)" id="metal-silver-pd">
+          <div class="option-card" onclick="selectMetal('silver-ox',1680)" id="metal-silver-ox">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Silver / Palladium</p><p class="option-card__desc">Harder, whiter, more resistant to tarnish.</p><p class="option-card__price">$1,333</p>
+            <p class="option-card__name">Sterling Silver — Oxidized</p><p class="option-card__desc">Dark patina deepens the engraved lines. Sterling only.</p><p class="option-card__price">$1,680</p>
           </div>
-          <div class="option-card" onclick="selectMetal('gold14',5555)" id="metal-gold14">
+          <div class="option-card" onclick="selectMetal('platinum',3980)" id="metal-platinum">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">14k Yellow Gold</p><p class="option-card__desc">Solar. Warm. The oldest sacred metal on Earth.</p><p class="option-card__price">$5,555</p>
+            <p class="option-card__name">Platinum</p><p class="option-card__desc">Rarer than gold. Cooler than silver. The most enduring metal on Earth.</p><p class="option-card__price">$3,980</p>
           </div>
-          <div class="option-card" onclick="selectMetal('gold18',7777)" id="metal-gold18">
+          <div class="option-card" onclick="selectMetal('gold14',4980)" id="metal-gold14">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">18k Yellow Gold</p><p class="option-card__desc">Richer color. Higher purity. Deeper warmth.</p><p class="option-card__price">$7,777</p>
+            <p class="option-card__name">14k Yellow Gold</p><p class="option-card__desc">Solar. Warm. The oldest sacred metal on Earth.</p><p class="option-card__price">$4,980</p>
           </div>
-          <div class="option-card" onclick="selectMetal('platinum',0)" id="metal-platinum">
+          <div class="option-card" onclick="selectMetal('gold18',7980)" id="metal-gold18">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Platinum</p><p class="option-card__desc">Rarer than gold. Cooler than silver. Each ring quoted individually — the metal, the weight, the moment.</p><p class="option-card__price" style="letter-spacing:.18em; color:var(--cream);">Price on Request</p>
+            <p class="option-card__name">18k Yellow Gold</p><p class="option-card__desc">Richer color. Higher purity. Deeper warmth.</p><p class="option-card__price">$7,980</p>
           </div>
         </div>
         <div class="wizard__nav wizard__nav--split">
@@ -666,7 +666,7 @@ function selectSystem(s){
   }
 }
 
-const metalIds=['bronze','silver','silver-pd','gold14','gold18','platinum'];
+const metalIds=['silver','silver-pd','silver-ox','platinum','gold14','gold18'];
 function selectMetal(m,price){
   state.metal=m; state.metalPrice=price;
   metalIds.forEach(x=>{ const el=document.getElementById('metal-'+x); if(el) el.classList.remove('selected'); });
@@ -817,7 +817,7 @@ async function submitChartEmail(){
 }
 
 const bandNames={dream:'Dream Portal',moroccan:'Moroccan Stars',acanthus:'Acanthus',diamond:'Stars & Diamonds'};
-const metalNames={'bronze':'Bronze','silver':'Sterling Silver','silver-pd':'Silver / Palladium','gold14':'14k Yellow Gold','gold18':'18k Yellow Gold','platinum':'Platinum'};
+const metalNames={'silver':'Sterling Silver','silver-pd':'Silver / Palladium','silver-ox':'Sterling Silver — Oxidized','platinum':'Platinum','gold14':'14k Yellow Gold','gold18':'18k Yellow Gold'};
 
 function buildSummary(){
   const bd=document.getElementById('birthdate').value;
@@ -864,7 +864,7 @@ const METAL_TO_TIER = {
   'gold14':    '14k',
   'gold18':    '18k',
   'platinum':  'platinum',
-  'bronze':    'bronze'
+  'silver-ox': 'silver_ox'
 };
 const BAND_TO_KEY = {
   'dream':    'dream_portal',
