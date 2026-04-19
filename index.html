@@ -256,6 +256,7 @@
     .ayanamsa-toggle { flex-direction:column; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -711,65 +712,68 @@ function selectBand(b){
 
 let _chartEmailSubmitted = false;
 
-async function captureSvgAsPng() {
-  const svgEl = document.querySelector('#natal-orrery-wrap .natal-orrery-container svg');
-  if (!svgEl) return null;
+async function captureChartAsPng() {
+  const wrap = document.getElementById('natal-orrery-wrap');
+  if (!wrap) return null;
 
-  // Clone SVG and inject the Starsigns @font-face so canvas gets the font
-  const clone = svgEl.cloneNode(true);
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-
-  let fontFaceRule = '';
-  for (const sheet of document.styleSheets) {
-    try {
-      for (const rule of sheet.cssRules) {
-        if (rule instanceof CSSFontFaceRule && rule.style.getPropertyValue('font-family').includes('Starsigns')) {
-          fontFaceRule = rule.cssText;
-          break;
-        }
-      }
-    } catch(e) {}
-    if (fontFaceRule) break;
+  // Step 1: render the SVG wheel to a bitmap and swap it in so html2canvas
+  // sees a plain <img> instead of an SVG (avoids cross-origin / taint issues).
+  const svgEl = wrap.querySelector('.natal-orrery-container svg');
+  let svgImg = null;
+  let placeholder = null;
+  if (svgEl) {
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const PAD = 40;
+    const vb = (clone.getAttribute('viewBox') || '0 0 420 420').split(' ').map(Number);
+    const [vx, vy, vw, vh] = vb;
+    clone.setAttribute('viewBox', `${vx - PAD} ${vy - PAD} ${vw + PAD * 2} ${vh + PAD * 2}`);
+    clone.setAttribute('width',  vw + PAD * 2);
+    clone.setAttribute('height', vh + PAD * 2);
+    const svgData = new XMLSerializer().serializeToString(clone);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    await new Promise((res, rej) => {
+      const tmp = new Image();
+      tmp.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = vw + PAD * 2; c.height = vh + PAD * 2;
+        const ctx2 = c.getContext('2d');
+        ctx2.fillStyle = '#08090c';
+        ctx2.fillRect(0, 0, c.width, c.height);
+        ctx2.drawImage(tmp, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        svgImg = new Image();
+        svgImg.src = c.toDataURL('image/png');
+        svgImg.style.cssText = svgEl.style.cssText;
+        svgImg.style.display = 'block';
+        svgImg.style.margin = '0 auto';
+        svgImg.style.width = svgEl.getAttribute('width') || '420px';
+        placeholder = document.createElement('div');
+        placeholder.style.cssText = 'text-align:center;';
+        svgEl.parentNode.replaceChild(placeholder, svgEl);
+        placeholder.appendChild(svgImg);
+        res();
+      };
+      tmp.onerror = () => { URL.revokeObjectURL(url); rej(new Error('SVG render failed')); };
+      tmp.src = url;
+    });
   }
 
-  if (fontFaceRule) {
-    let defs = clone.querySelector('defs');
-    if (!defs) {
-      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-      clone.prepend(defs);
-    }
-    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-    style.textContent = fontFaceRule;
-    defs.appendChild(style);
-  }
-
-  // Expand viewBox by PAD on every side so overflow:visible nodes aren't clipped by drawImage
-  const PAD = 40;
-  const vb = (clone.getAttribute('viewBox') || '0 0 420 420').split(' ').map(Number);
-  const [vx, vy, vw, vh] = vb;
-  clone.setAttribute('viewBox', `${vx - PAD} ${vy - PAD} ${vw + PAD * 2} ${vh + PAD * 2}`);
-  clone.setAttribute('width',  vw + PAD * 2);
-  clone.setAttribute('height', vh + PAD * 2);
-
-  const svgData = new XMLSerializer().serializeToString(clone);
-  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(svgBlob);
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = vw + PAD * 2; c.height = vh + PAD * 2;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#08090c';
-      ctx.fillRect(0, 0, c.width, c.height);
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      resolve(c.toDataURL('image/png').replace('data:image/png;base64,', ''));
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('SVG capture failed')); };
-    img.src = url;
+  // Step 2: html2canvas the full wrap (wheel bitmap + table + tradition label)
+  const canvas = await html2canvas(wrap, {
+    backgroundColor: '#08090c',
+    scale: 2,
+    useCORS: true,
+    logging: false
   });
+
+  // Step 3: restore the original SVG
+  if (svgEl && placeholder) {
+    placeholder.parentNode.replaceChild(svgEl, placeholder);
+  }
+
+  return canvas.toDataURL('image/png').replace('data:image/png;base64,', '');
 }
 
 async function submitChartEmail(){
@@ -789,7 +793,7 @@ async function submitChartEmail(){
   btn.textContent = 'Sending...';
   btn.disabled = true;
   try {
-    const chart_image = await captureSvgAsPng();
+    const chart_image = await captureChartAsPng();
     if (!chart_image) throw new Error('Could not capture chart image');
 
     const res = await fetch('https://alpha-production-1b1b.up.railway.app/api/send-chart', {
