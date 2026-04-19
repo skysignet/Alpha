@@ -190,6 +190,7 @@ def send_chart():
         birthdate   = data.get('date', '')
         birthplace  = data.get('place', '')
         system      = data.get('system', 'western')
+        birthtime   = data.get('time', '')
         chart       = data.get('chart', {})
         chart_image = data.get('chart_image', '')  # base64 PNG from browser canvas
 
