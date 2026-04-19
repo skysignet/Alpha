@@ -144,9 +144,8 @@ def build_email_html(chart, birthdate, birthtime, birthplace, system_label):
   <!-- CTA -->
   <tr>
     <td align="center" style="padding:0 0 48px;">
-      <p style="margin:0 0 8px;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;color:#c4a05a;text-transform:uppercase;">✦ &nbsp; Commission Yours &nbsp; ✦</p>
-      <p style="margin:0 0 28px;font-size:16px;line-height:1.9;color:#d8cfc0;max-width:420px;">This is a one-of-one configuration. No one else has had it cast. Proceed to commission it in precious metal.</p>
-      <a href="{cta_url}" style="display:inline-block;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#08090c;background:#c4a05a;text-decoration:none;padding:16px 40px;">Continue Your Commission</a>
+      <p style="margin:0 0 28px;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;color:#c4a05a;text-transform:uppercase;">✦ &nbsp; When you are ready &nbsp; ✦</p>
+      <a href="{cta_url}" style="display:inline-block;font-family:'Palatino Linotype',Palatino,serif;font-size:11px;letter-spacing:5px;text-transform:uppercase;color:#08090c;background:#c4a05a;text-decoration:none;padding:16px 40px;">Commission in Metal</a>
     </td>
   </tr>
 
