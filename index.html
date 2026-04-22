@@ -255,6 +255,23 @@
     .progress-label { display:none; }
     .ayanamsa-toggle { flex-direction:column; }
   }
+
+  /* PRODUCT GRID */
+  .product-grid { padding:4rem 0; }
+  .product-grid__cards { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
+  @media(max-width:580px){ .product-grid__cards { grid-template-columns:1fr; } }
+  .product-card { background:var(--card); border:1px solid var(--border); position:relative; transition:border-color .3s; }
+  .product-card:hover { border-color:var(--gold-dim); }
+  .product-card__img { width:100%; aspect-ratio:1; background:var(--deep); border-bottom:1px solid var(--border); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .product-card__img-placeholder { font-family:var(--cinzel); font-size:.5rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; text-align:center; pointer-events:none; }
+  .product-card__hover { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(8,9,12,.5); opacity:0; transition:opacity .45s ease; }
+  .product-card:hover .product-card__hover { opacity:1; }
+  .btn-select-size { font-family:var(--cinzel); font-size:.58rem; letter-spacing:.38em; text-transform:uppercase; color:var(--cream); background:transparent; border:1px solid rgba(240,232,213,.5); padding:.88rem 2.1rem; cursor:pointer; transition:border-color .3s,color .3s; }
+  .btn-select-size:hover { border-color:var(--cream); color:#fff; }
+  .product-card__info { padding:1.15rem 1.35rem 1.4rem; }
+  .product-card__name { font-family:var(--cinzel); font-size:.75rem; letter-spacing:.24em; color:var(--cream); text-transform:uppercase; margin-bottom:.3rem; }
+  .product-card__meta { font-family:var(--cinzel); font-size:.56rem; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; }
+  .product-card__price { color:var(--gold); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
@@ -280,6 +297,67 @@
         <a href="#commission" class="btn-primary">Begin Your Commission</a>
         <span class="hero__cta-note">Hand cast and finished &nbsp;·&nbsp; Ships in two weeks</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT GRID -->
+<section class="product-grid section">
+  <div class="container">
+    <div class="product-grid__cards">
+
+      <div class="product-card">
+        <div class="product-card__img">
+          <span class="product-card__img-placeholder">Photo<br>coming soon</span>
+          <div class="product-card__hover">
+            <button class="btn-select-size" onclick="selectFromGrid('bronze',580)">Select Size</button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <p class="product-card__name">Earth Ring</p>
+          <p class="product-card__meta">Bronze &nbsp;·&nbsp; <span class="product-card__price">$580</span></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-card__img">
+          <span class="product-card__img-placeholder">Photo<br>coming soon</span>
+          <div class="product-card__hover">
+            <button class="btn-select-size" onclick="selectFromGrid('silver',1480)">Select Size</button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <p class="product-card__name">Lunar Ring</p>
+          <p class="product-card__meta">Sterling Silver &nbsp;·&nbsp; <span class="product-card__price">$1,480</span></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-card__img">
+          <span class="product-card__img-placeholder">Photo<br>coming soon</span>
+          <div class="product-card__hover">
+            <button class="btn-select-size" onclick="selectFromGrid('gold14',4980)">Select Size</button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <p class="product-card__name">Aura Ring</p>
+          <p class="product-card__meta">14k Yellow Gold &nbsp;·&nbsp; <span class="product-card__price">$4,980</span></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-card__img">
+          <span class="product-card__img-placeholder">Photo<br>coming soon</span>
+          <div class="product-card__hover">
+            <button class="btn-select-size" onclick="selectFromGrid('platinum',3980)">Select Size</button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <p class="product-card__name">Stellar Ring</p>
+          <p class="product-card__meta">Platinum &nbsp;·&nbsp; <span class="product-card__price">$3,980</span></p>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -673,6 +751,11 @@ function selectSystem(s){
 }
 
 const metalIds=['bronze','silver','silver-pd','silver-ox','platinum','gold14','gold18'];
+function selectFromGrid(m,price){
+  selectMetal(m,price);
+  goStep(3);
+}
+
 function selectMetal(m,price){
   state.metal=m; state.metalPrice=price;
   metalIds.forEach(x=>{ const el=document.getElementById('metal-'+x); if(el) el.classList.remove('selected'); });
