@@ -32,9 +32,9 @@ TIERS = {
     "silver":     {"name": "SkySignet — Sterling Silver",         "price":   150000},
     "silver_ox":  {"name": "SkySignet — Sterling Silver Oxidized","price":   170000},
     "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price":   190000},
-    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   860000},
-    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":  1080000},
-    "platinum":   {"name": "SkySignet — Platinum",                "price":  1350000},
+    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   780000},
+    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":   960000},
+    "platinum":   {"name": "SkySignet — Platinum",                "price":  1110000},
 }
 
 BAND_ADDON = {
