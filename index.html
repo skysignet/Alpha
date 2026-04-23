@@ -621,7 +621,7 @@
         <div class="field-group" style="margin-bottom:1.25rem;">
           <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;">
             <input type="checkbox" id="initialsEnabled" onchange="toggleInitials(this.checked)" style="width:1.1rem;height:1.1rem;accent-color:var(--gold);cursor:pointer;">
-            <span class="field-label" style="margin-bottom:0;">Engrave Initials &nbsp;<span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$50</span></span>
+            <span class="field-label" style="margin-bottom:0;">Engrave Initials &nbsp;<span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$75</span></span>
           </label>
         </div>
         <div id="initials-fields" style="display:none;">
@@ -660,7 +660,7 @@
           <div class="summary-row"><span class="summary-key">Band</span><span class="summary-val" id="sum-band">—</span></div>
           <div class="summary-row" id="sum-band-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Stars &amp; Diamonds</span><span class="summary-val" style="color:var(--gold);">+$500</span></div>
           <div class="summary-row"><span class="summary-key">Initials</span><span class="summary-val" id="sum-initials">—</span></div>
-          <div class="summary-row" id="sum-initials-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Initial Engraving</span><span class="summary-val" style="color:var(--gold);">+$50</span></div>
+          <div class="summary-row" id="sum-initials-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Initial Engraving</span><span class="summary-val" style="color:var(--gold);">+$75</span></div>
           <div class="summary-row"><span class="summary-key">Ring Size</span><span class="summary-val" id="sum-size">—</span></div>
           <div class="summary-total"><span class="total-label">Total</span><span class="total-price" id="sum-total">$—</span></div>
         </div>
@@ -775,7 +775,7 @@ function toggleInitials(checked){
     state.middleInitial = '';
     state.middleExtra = 0;
   } else {
-    state.middleExtra = 50;
+    state.middleExtra = 75;
   }
 }
 
