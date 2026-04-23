@@ -32,18 +32,19 @@ TIERS = {
     "silver":     {"name": "SkySignet — Sterling Silver",         "price":   150000},
     "silver_ox":  {"name": "SkySignet — Sterling Silver Oxidized","price":   170000},
     "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price":   190000},
-    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   660000},
-    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":   820000},
-    "platinum":   {"name": "SkySignet — Platinum",                "price":  1060000},
+    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   860000},
+    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":  1080000},
+    "platinum":   {"name": "SkySignet — Platinum",                "price":  1350000},
 }
 
 BAND_ADDON = {
-    "dream_portal":       "Dream Portal Band (+$555)",
-    "moroccan_stars":     "Moroccan Stars Band (+$555)",
-    "acanthus":           "Acanthus Band (+$555)",
-    "stars_and_diamonds": "Stars & Diamonds Band (+$555)",
+    "dream_portal":       "Dream Portal Band (+$500)",
+    "moroccan_stars":     "Moroccan Stars Band (+$500)",
+    "acanthus":           "Acanthus Band (+$500)",
+    "stars_and_diamonds": "Stars & Diamonds Band (+$500)",
 }
-BAND_PRICE = 50000  # $500.00
+BAND_PRICE   = 50000  # $500.00
+INITIALS_PRICE = 7500  # $75.00
 
 @app.route('/api/checkout', methods=['POST', 'OPTIONS'])
 def checkout():
@@ -94,6 +95,16 @@ def checkout():
                     "currency": "usd",
                     "unit_amount": BAND_PRICE,
                     "product_data": {"name": BAND_ADDON[band]},
+                },
+                "quantity": 1,
+            })
+
+        if initials:
+            line_items.append({
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": INITIALS_PRICE,
+                    "product_data": {"name": "Initial Engraving (+$75)"},
                 },
                 "quantity": 1,
             })
