@@ -28,13 +28,13 @@ def add_cors(response):
     return response
 
 TIERS = {
-    "bronze":     {"name": "SkySignet — Bronze",                  "price":  55500},
-    "silver":     {"name": "SkySignet — Sterling Silver",         "price": 111100},
-    "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price": 133300},
-    "silver_ox":  {"name": "SkySignet — Sterling Silver Oxidized","price": 168000},
-    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price": 555500},
-    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price": 777700},
-    "platinum":   {"name": "SkySignet — Platinum",                "price": 398000},
+    "bronze":     {"name": "SkySignet — Bronze",                  "price":    55000},
+    "silver":     {"name": "SkySignet — Sterling Silver",         "price":   150000},
+    "silver_ox":  {"name": "SkySignet — Sterling Silver Oxidized","price":   170000},
+    "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price":   190000},
+    "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   660000},
+    "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":   820000},
+    "platinum":   {"name": "SkySignet — Platinum",                "price":  1060000},
 }
 
 BAND_ADDON = {
@@ -43,7 +43,7 @@ BAND_ADDON = {
     "acanthus":           "Acanthus Band (+$555)",
     "stars_and_diamonds": "Stars & Diamonds Band (+$555)",
 }
-BAND_PRICE = 55500  # $555.00
+BAND_PRICE = 50000  # $500.00
 
 @app.route('/api/checkout', methods=['POST', 'OPTIONS'])
 def checkout():
