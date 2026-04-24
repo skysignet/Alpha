@@ -515,7 +515,7 @@
         <div class="wizard__nav">
           <button class="btn-nav btn-next" onclick="validateStep1()">Continue</button>
         </div>
-        <p id="step1-error" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;">Please complete all birth information to continue.</p>
+
       </div>
 
       <!-- STEP 2 -->
@@ -1004,12 +1004,18 @@ function validateStep1(){
   const bd = document.getElementById('birthdate').value;
   const bt = document.getElementById('birthtime').value;
   const bp = document.getElementById('birthplace').value.trim();
-  const err = document.getElementById('step1-error');
   if(!bd || !bt || !bp){
-    err.style.display = 'block';
+    if(!document.getElementById('step1-error')){
+      const err = document.createElement('p');
+      err.id = 'step1-error';
+      err.style.cssText = 'font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;';
+      err.textContent = 'Please complete all birth information to continue.';
+      document.querySelector('.btn-next[onclick="validateStep1()"]').before(err);
+    }
     return;
   }
-  err.style.display = 'none';
+  const errEl = document.getElementById('step1-error');
+  if(errEl) errEl.remove();
   goStep(2);
 }
 
