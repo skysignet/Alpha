@@ -312,7 +312,7 @@
         <div class="product-card__img">
           <img src="bronzering.png" alt="Bronze ring" style="width:100%; height:100%; object-fit:cover;">
           <div class="product-card__hover">
-            <button class="btn-select-size" onclick="selectFromGrid('bronze',950)">Begin</button>
+            <button class="btn-select-size" onclick="beginCommission('bronze')">Begin</button>
           </div>
         </div>
         <div class="product-card__info">
@@ -326,7 +326,7 @@
         <div class="product-card__img">
           <img src="silverring.png" alt="Sterling Silver ring" style="width:100%; height:100%; object-fit:cover;">
           <div class="product-card__hover">
-            <button class="btn-select-size" onclick="selectFromGrid('silver',1500)">Begin</button>
+            <button class="btn-select-size" onclick="beginCommission('silver')">Begin</button>
           </div>
         </div>
         <div class="product-card__info">
@@ -340,7 +340,7 @@
         <div class="product-card__img">
           <img src="14kgoldring.png" alt="14k Yellow Gold ring" style="width:100%; height:100%; object-fit:cover;">
           <div class="product-card__hover">
-            <button class="btn-select-size" onclick="selectFromGrid('gold14',7700)">Begin</button>
+            <button class="btn-select-size" onclick="beginCommission('gold')">Begin</button>
           </div>
         </div>
         <div class="product-card__info">
@@ -354,7 +354,7 @@
         <div class="product-card__img">
           <img src="platinumring.png" alt="Platinum ring" style="width:100%; height:100%; object-fit:cover;">
           <div class="product-card__hover">
-            <button class="btn-select-size" onclick="selectFromGrid('platinum',11000)">Begin</button>
+            <button class="btn-select-size" onclick="beginCommission('platinum')">Begin</button>
           </div>
         </div>
         <div class="product-card__info">
@@ -780,10 +780,11 @@ function applyMetalFilter(){
   });
 }
 
-function selectFromGrid(m,price){
-  pendingMetalFamily=m==='bronze'?'bronze':m==='silver'?'silver':m==='gold14'||m==='gold18'?'gold':'platinum';
-  selectMetal(m,price);
-  goStep(3);
+function beginCommission(family){
+  pendingMetalFamily=family;
+  goStep(1);
+  const wizard=document.querySelector('[data-section="wizard"]');
+  if(wizard) wizard.scrollIntoView({behavior:'smooth'});
 }
 
 function selectMetal(m,price){
