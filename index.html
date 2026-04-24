@@ -744,6 +744,7 @@ function goStep(n){
     else if(s<n) el.classList.add('done');
   });
   state.step=n;
+  if(n===3) applyMetalFilter();
   if(n===6) buildSummary();
   window.scrollTo({top:document.getElementById('commission').offsetTop-80,behavior:'smooth'});
 }
@@ -763,7 +764,24 @@ function selectSystem(s){
 }
 
 const metalIds=['bronze','silver','silver-pd','silver-ox','platinum','gold14','gold18'];
+const FAMILY_METALS={
+  bronze:    ['bronze'],
+  silver:    ['silver','silver-ox','silver-pd'],
+  gold:      ['gold14','gold18'],
+  platinum:  ['platinum'],
+};
+let pendingMetalFamily=null;
+
+function applyMetalFilter(){
+  const allowed=pendingMetalFamily ? FAMILY_METALS[pendingMetalFamily] : null;
+  metalIds.forEach(id=>{
+    const el=document.getElementById('metal-'+id);
+    if(el) el.style.display=(allowed && !allowed.includes(id)) ? 'none' : '';
+  });
+}
+
 function selectFromGrid(m,price){
+  pendingMetalFamily=m==='bronze'?'bronze':m==='silver'?'silver':m==='gold14'||m==='gold18'?'gold':'platinum';
   selectMetal(m,price);
   goStep(3);
 }
