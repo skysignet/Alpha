@@ -783,7 +783,7 @@ function applyMetalFilter(){
 function beginCommission(family){
   pendingMetalFamily=family;
   goStep(1);
-  const wizard=document.querySelector('[data-section="wizard"]');
+  const wizard=document.querySelector('.wizard')||document.getElementById('configurator')||document.querySelector('[class*="wizard"]');
   if(wizard) wizard.scrollIntoView({behavior:'smooth'});
 }
 
