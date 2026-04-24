@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -480,217 +480,24 @@
     </div>
   </div>
 </section>
+
 
-<!-- CONFIGURATOR -->
-<section class="configurator section" id="commission">
-  <div class="container">
-    <div class="configurator__header reveal">
-      <span class="section-label">✦ Commission Yours ✦</span>
-      <h2 class="section-title">Create Your SkySignet Ring</h2>
-      <p style="color:var(--text); font-style:italic;">A bespoke 1/1 artifact made for you.</p>
+<!-- BIRTH TEASER -->
+<section class="section" style="padding:5rem 0 4rem;">
+  <div class="container" style="text-align:center;">
+    <div class="reveal">
+      <span class="section-label">✦ Begin Yours ✦</span>
+      <h2 class="section-title" style="margin-bottom:1rem;">What was in the sky when you arrived?</h2>
+      <p style="color:var(--muted); font-style:italic; font-size:1rem; max-width:440px; margin:0 auto 2.5rem; line-height:1.7;">Enter your birth data to see your natal chart and begin your commission.</p>
     </div>
-
-    <!-- wizard opens directly; email collected after chart renders in step 2 -->
-    <div id="wizardWrap">
-
-    <div class="wizard__progress" id="progressBar">
-      <div class="progress-step active" data-step="1"><div class="progress-dot">1</div><span class="progress-label">Birth</span></div>
-      <div class="progress-step" data-step="2"><div class="progress-dot">2</div><span class="progress-label">Tradition</span></div>
-      <div class="progress-step" data-step="3"><div class="progress-dot">3</div><span class="progress-label">Metal</span></div>
-      <div class="progress-step" data-step="4"><div class="progress-dot">4</div><span class="progress-label">Band</span></div>
-      <div class="progress-step" data-step="5"><div class="progress-dot">5</div><span class="progress-label">Details</span></div>
-      <div class="progress-step" data-step="6"><div class="progress-dot">6</div><span class="progress-label">Review</span></div>
-    </div>
-
-    <div class="wizard">
-
-      <!-- STEP 1 -->
-      <div class="wizard__panel active" id="step-1">
-        <p class="panel-title">Your birth data</p>
-        <p class="panel-subtitle">The planets will be calculated to the minute of your arrival.</p>
-        <div class="field-row">
-          <div class="field-group"><label class="field-label">Date of Birth</label><input type="date" class="field-input" id="birthdate"></div>
-          <div class="field-group"><label class="field-label">Time of Birth</label><input type="time" class="field-input" id="birthtime"></div>
-        </div>
-        <div class="field-group"><label class="field-label">Place of Birth</label><input type="text" class="field-input" id="birthplace" placeholder="City, Country"></div>
-        <p class="finish-note">Birth time is required for accurate house placements. If unknown, enter 12:00 noon and we will note approximate houses on your certificate of provenance.</p>
-        <div class="wizard__nav">
-          <button class="btn-nav btn-next" onclick="validateStep1()">Continue</button>
-        </div>
-
+    <form class="reveal" onsubmit="startCommissionFromTeaser(event)" style="max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:1rem;">
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">Date of Birth</label><input type="date" class="field-input" id="teaser-date" required></div>
+        <div class="field-group"><label class="field-label">Time of Birth</label><input type="time" class="field-input" id="teaser-time" required></div>
       </div>
-
-      <!-- STEP 2 -->
-      <div class="wizard__panel" id="step-2">
-        <p class="panel-title">Choose your tradition</p>
-        <p class="panel-subtitle">Both are astronomically exact. Different lenses on the same sky.</p>
-        <div class="ayanamsa-toggle">
-          <button class="toggle-btn selected" id="btn-western" onclick="selectSystem('western')">Western Tropical<br><span style="font-size:.8em; font-style:italic; letter-spacing:0; text-transform:none; color:var(--muted);">Seasons-based. Aries at spring equinox.</span></button>
-          <button class="toggle-btn" id="btn-vedic" onclick="selectSystem('vedic')">Vedic Sidereal<br><span style="font-size:.8em; font-style:italic; letter-spacing:0; text-transform:none; color:var(--muted);">Stars-based. Lahiri ayanamsa.</span></button>
-        </div>
-        <p class="finish-note" style="margin-top:1.2rem;">Most Western practitioners use the tropical system. Vedic (Jyotisha) tracks the actual sidereal positions of the constellations, shifting each planet approximately 23 degrees. Both encoded with full precision.</p>
-        <div style="text-align:center;">
-          <button id="btn-calculate-chart" onclick="triggerNatalCalculation()">Calculate My Chart</button>
-        </div>
-        <div id="natal-orrery-wrap">
-          <p class="orrery-loading">✶ &nbsp; Your chart will appear here &nbsp; ✶</p>
-        </div>
-        <div id="chartEmailGate" style="display:none; margin-top:2.5rem; background:var(--card); border:1px solid var(--border); padding:2rem; text-align:center;">
-          <p style="font-family:var(--cinzel); font-size:.62rem; letter-spacing:.28em; color:var(--gold); text-transform:uppercase; margin-bottom:.75rem;">✦ Your Chart is Ready ✦</p>
-          <p style="font-size:1.05rem; color:var(--text); line-height:1.7; margin-bottom:.5rem;">Enter your email to receive your chart and continue your commission.</p>
-          <p style="font-size:.88rem; color:var(--muted); font-style:italic; margin-bottom:1.5rem; line-height:1.7;">Your chart belongs to you. We will send it to your inbox and keep you informed at every stage of your commission.</p>
-          <div class="kit-form-wrap">
-            <div class="kit-form__row">
-              <input type="email" id="chartEmail" class="kit-form__input" placeholder="your@email.com" autocomplete="email">
-              <button class="kit-form__btn" id="chartEmailBtn" onclick="submitChartEmail()">Send My Chart</button>
-            </div>
-            <p class="kit-form__msg" id="chartEmailMsg"></p>
-          </div>
-          <p style="font-family:var(--cinzel); font-size:.48rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; margin-top:1.2rem;">Your birth data is held in confidence and never shared.</p>
-          <p style="margin-top:1.25rem;"><a href="#" onclick="skipChartEmail();return false;" style="font-size:.88rem; color:var(--muted); text-decoration:underline; cursor:pointer;">Continue without sending</a></p>
-        </div>
-        <div class="wizard__nav wizard__nav--split" style="margin-top:2.5rem;">
-          <button class="btn-nav btn-back" onclick="goStep(1)">&larr; Back</button>
-          <button class="btn-nav btn-next" id="btn-step2-continue" onclick="goStep(3)" disabled>Continue</button>
-        </div>
-      </div>
-
-      <!-- STEP 3 -->
-      <div class="wizard__panel" id="step-3">
-        <p class="panel-title">Choose your metal</p>
-        <p class="panel-subtitle">Each carries its own weight and quality of light. All metals responsibly sourced and recycled.</p>
-    <div class="option-grid">
-          <div class="option-card" onclick="selectMetal('bronze',950)" id="metal-bronze" data-family="bronze">
-            <div class="option-card__img"><img src="bronzering.png" alt="Bronze ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">Bronze</p><p class="option-card__desc">Ancient earth metal. Made to be worn.</p><p class="option-card__price">$950</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('silver',1500)" id="metal-silver">
-            <div class="option-card__img"><img src="silverring.png" alt="Sterling Silver ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar metal. Cool, reflective. Patinas with time.</p><p class="option-card__price">$1500</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('silver-ox',1700)" id="metal-silver-ox">
-            <div class="option-card__img"><img src="oxsilverring.png" alt="Oxidized Silver ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">Sterling Silver — Oxidized</p><p class="option-card__desc">Darkened silver. Polished relief. The lines held in shadow.</p><p class="option-card__price">$1700</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('silver-pd',1900)" id="metal-silver-pd">
-            <div class="option-card__img"><img src="silverpdring.png" alt="Silver Palladium ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">Silver / Palladium</p><p class="option-card__desc">Silver alloyed with palladium. Harder, whiter. Holds its color.</p><p class="option-card__price">$1900</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('gold14',7700)" id="metal-gold14">
-            <div class="option-card__img"><img src="14kgoldring.png" alt="14k Yellow Gold ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">14k Yellow Gold</p><p class="option-card__desc">Solar metal. Warm. Enduring.</p><p class="option-card__price">$7700</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('gold18',9800)" id="metal-gold18">
-            <div class="option-card__img"><img src="18kgoldring.png" alt="18k Yellow Gold ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">18k Yellow Gold</p><p class="option-card__desc">Solar metal in higher purity. Deeper in color.</p><p class="option-card__price">$9800</p>
-          </div>
-          <div class="option-card" onclick="selectMetal('platinum',11000)" id="metal-platinum">
-            <div class="option-card__img"><img src="platinumring.png" alt="Platinum ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
-            <p class="option-card__name">Platinum</p><p class="option-card__desc">Shines like starlight. Heavier than gold. Endures.</p><p class="option-card__price">$11000</p>
-          </div>
-        </div>
-        <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(2)">&larr; Back</button>
-          <button class="btn-nav btn-next" id="btn-step3-continue" onclick="goStep(4)" disabled>Continue</button>
-        </div>
-      </div>
-
-      <!-- STEP 4 -->
-      <div class="wizard__panel" id="step-4">
-        <p class="panel-title">Choose your band</p>
-        <p class="panel-subtitle">The pattern engraved in relief around the shank.</p>
-        <div class="option-grid" style="grid-template-columns:repeat(auto-fit,minmax(145px,1fr));">
-          <div class="option-card" onclick="selectBand('dream')" id="band-dream">
-            <div class="option-card__img"><span style="font-size:1.2rem; opacity:.35;">⊹</span></div>
-            <p class="option-card__name">Dream Portal</p><p class="option-card__desc">Geometric mandala radiating from center</p>
-          </div>
-          <div class="option-card" onclick="selectBand('moroccan')" id="band-moroccan">
-            <div class="option-card__img"><span style="font-size:1.2rem; opacity:.35;">✦</span></div>
-            <p class="option-card__name">Moroccan Stars</p><p class="option-card__desc">Islamic geometric star pattern in continuous tessellation</p>
-          </div>
-          <div class="option-card" onclick="selectBand('acanthus')" id="band-acanthus">
-            <div class="option-card__img"><span style="font-size:1.2rem; opacity:.35;">❧</span></div>
-            <p class="option-card__name">Acanthus</p><p class="option-card__desc">Classical leaf scroll. The language of ancient stone.</p>
-          </div>
-          <div class="option-card" onclick="selectBand('diamond')" id="band-diamond">
-            <div class="option-card__img"><span style="font-size:1.2rem; opacity:.35;">◇</span></div>
-            <p class="option-card__name">Stars &amp; Diamonds</p><p class="option-card__desc">Starfield band with inset diamonds</p><p class="option-card__price">+$500</p>
-          </div>
-        </div>
-        <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(3)">&larr; Back</button>
-          <button class="btn-nav btn-next" onclick="goStep(5)">Continue</button>
-        </div>
-      </div>
-
-      <!-- STEP 5 -->
-      <div class="wizard__panel" id="step-5">
-        <p class="panel-title">Final details</p>
-        <p class="panel-subtitle">Engraved on the interior of the band.</p>
-        <div class="field-group" style="margin-bottom:1.25rem;">
-          <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer;">
-            <input type="checkbox" id="initialsEnabled" onchange="toggleInitials(this.checked)" style="width:1.1rem;height:1.1rem;accent-color:var(--gold);cursor:pointer;">
-            <span class="field-label" style="margin-bottom:0;">Engrave Initials &nbsp;<span style="font-family:var(--cinzel);font-size:.52rem;letter-spacing:.15em;color:var(--gold);">+$75</span></span>
-          </label>
-        </div>
-        <div id="initials-fields" style="display:none;">
-          <div class="field-row">
-            <div class="field-group"><label class="field-label">First Initial</label><input type="text" class="field-input" id="initial1" maxlength="1" placeholder="—" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-            <div class="field-group"><label class="field-label">Middle Initial</label><input type="text" class="field-input" id="initial2" maxlength="1" placeholder="—" oninput="updateMiddleInitial(this.value)" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-            <div class="field-group"><label class="field-label">Last Initial</label><input type="text" class="field-input" id="initial3" maxlength="1" placeholder="—" style="text-transform:uppercase; letter-spacing:.3em; font-size:1.4rem; text-align:center;"></div>
-          </div>
-          <p class="finish-note">Initials are engraved on the interior of the band.</p>
-        </div>
-        <div class="field-group" style="margin-top:1.5rem;">
-          <label class="field-label">Ring Size (US)</label>
-          <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;" oninput="document.getElementById('btn-step5-continue').disabled=!this.value.trim()">
-        </div>
-        <p class="finish-note">Unsure of your size? A sizing guide will be included in your confirmation email, or any jeweler can measure you in minutes at no charge.</p>
-        <div class="field-group" style="margin-top:1.5rem;">
-          <label class="field-label">Notes</label>
-          <textarea class="field-input" id="notes" rows="3" placeholder="Additional requests, gift messaging, or questions..."></textarea>
-        </div>
-        <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(4)">&larr; Back</button>
-          <button class="btn-nav btn-next" id="btn-step5-continue" onclick="goStep(6)" disabled>Review</button>
-        </div>
-      </div>
-
-      <!-- STEP 6 -->
-      <div class="wizard__panel" id="step-6">
-        <p class="panel-title">Your commission</p>
-        <p class="panel-subtitle">Review before proceeding to payment.</p>
-        <div id="natal-orrery-wrap-review"><p class="orrery-loading">✶ &nbsp; Your sky &nbsp; ✶</p></div>
-        <div class="summary-block" id="order-summary">
-          <div class="summary-row"><span class="summary-key">Birth</span><span class="summary-val" id="sum-birth">—</span></div>
-          <div class="summary-row"><span class="summary-key">Tradition</span><span class="summary-val" id="sum-system">—</span></div>
-          <div class="summary-row"><span class="summary-key">Metal</span><span class="summary-val" id="sum-metal">—</span></div>
-          <div class="summary-row" id="sum-metal-price-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;" id="sum-metal-price-label"></span><span class="summary-val" style="color:var(--gold);" id="sum-metal-price-val"></span></div>
-          <div class="summary-row"><span class="summary-key">Band</span><span class="summary-val" id="sum-band">—</span></div>
-          <div class="summary-row" id="sum-band-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Stars &amp; Diamonds</span><span class="summary-val" style="color:var(--gold);">+$500</span></div>
-          <div class="summary-row"><span class="summary-key">Initials</span><span class="summary-val" id="sum-initials">—</span></div>
-          <div class="summary-row" id="sum-initials-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Initial Engraving</span><span class="summary-val" style="color:var(--gold);">+$75</span></div>
-          <div class="summary-row"><span class="summary-key">Ring Size</span><span class="summary-val" id="sum-size">—</span></div>
-          <div class="summary-total"><span class="total-label">Order Total</span><span class="total-price" id="sum-total">$—</span></div>
-          <div class="summary-row" style="border-top:1px solid var(--border); margin-top:.5rem; padding-top:.8rem;"><span class="summary-key" style="color:var(--cream);">Due today (50% deposit)</span><span class="summary-val" style="color:var(--gold-light); font-style:normal;" id="sum-deposit">$—</span></div>
-          <div class="summary-row"><span class="summary-key">Balance due before shipping</span><span class="summary-val" id="sum-balance">$—</span></div>
-        </div>
-        <p style="font-size:.85rem; color:var(--muted); font-style:italic; margin-bottom:2rem;">Made by hand in America. Ships in three weeks. Fully insured.</p>
-        <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
-        <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:1.5rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
-        <div id="stripe-payment-wrap" style="margin-bottom:1.5rem; display:none;">
-          <div id="payment-element"></div>
-          <p id="stripe-error-msg" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;"></p>
-        </div>
-        <div class="wizard__nav wizard__nav--split">
-          <button class="btn-nav btn-back" onclick="goStep(5)">&larr; Back</button>
-          <button class="btn-nav btn-commission" id="btn-checkout" onclick="submitPayment()">Submit Commission &amp; Pay Deposit &rarr;</button>
-        </div>
-        <p style="font-size:.78rem; color:var(--muted); text-align:center; margin-top:1.5rem; font-style:italic;">Secure payment via Stripe. SSL encrypted. Non-refundable once casting begins.</p>
-      </div>
-
-    </div>
-    </div><!-- /wizardWrap -->
+      <div class="field-group"><label class="field-label">Place of Birth</label><input type="text" class="field-input" id="teaser-place" placeholder="City, Country" required></div>
+      <button type="submit" class="btn-commission" style="margin-top:.5rem; width:100%; padding:1rem; font-size:.72rem;">See My Chart &amp; Begin Commission &rarr;</button>
+    </form>
   </div>
 </section>
 
@@ -787,10 +594,15 @@ function applyMetalFilter(){
 }
 
 function beginCommission(family){
-  pendingMetalFamily=family;
-  goStep(1);
-  const w=document.querySelector('.wizard')||document.getElementById('configurator');
-  if(w) w.scrollIntoView({behavior:'smooth'});
+  window.location.href='commission.html?family='+encodeURIComponent(family);
+}
+function startCommissionFromTeaser(e){
+  e.preventDefault();
+  const d=document.getElementById('teaser-date').value;
+  const t=document.getElementById('teaser-time').value;
+  const p=document.getElementById('teaser-place').value.trim();
+  const params=new URLSearchParams({birthdate:d,birthtime:t,birthplace:p});
+  window.location.href='commission.html?'+params.toString();
 }
 
 function selectMetal(m,price){
@@ -1495,3 +1307,6 @@ function renderNatalChart(wrap, tableId, planets, houses, angles) {
 </script>
 </body>
 </html>
+
+
+
