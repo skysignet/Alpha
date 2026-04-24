@@ -258,9 +258,10 @@
 
   /* PRODUCT GRID */
   .product-grid { padding:4rem 0; }
-  .product-grid__cards { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
-  @media(max-width:580px){ .product-grid__cards { grid-template-columns:1fr; } }
-  .product-card { background:var(--card); border:1px solid var(--border); position:relative; transition:border-color .3s; }
+  .product-grid__cards { display:flex; flex-direction:row; justify-content:center; align-items:stretch; gap:24px; flex-wrap:nowrap; }
+  @media(max-width:768px){ .product-grid__cards { flex-wrap:wrap; } }
+  .product-card { background:var(--card); border:1px solid var(--border); position:relative; transition:border-color .3s; flex:1; max-width:32%; }
+  @media(max-width:768px){ .product-card { max-width:100%; } }
   .product-card:hover { border-color:var(--gold-dim); }
   .product-card__img { width:100%; aspect-ratio:1; background:var(--deep); border-bottom:1px solid var(--border); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
   .product-card__img-placeholder { font-family:var(--cinzel); font-size:.5rem; letter-spacing:.22em; color:var(--muted); text-transform:uppercase; text-align:center; pointer-events:none; }
