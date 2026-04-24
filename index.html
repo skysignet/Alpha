@@ -126,9 +126,10 @@
   .progress-step { display:flex; flex-direction:column; align-items:center; gap:.4rem; flex:1; min-width:48px; position:relative; }
   .progress-step::after { content:''; position:absolute; top:13px; left:50%; width:100%; height:1px; background:var(--border); }
   .progress-step:last-child::after { display:none; }
-  .progress-dot { width:26px; height:26px; border-radius:50%; border:1px solid var(--border); background:var(--deep); display:flex; align-items:center; justify-content:center; font-family:var(--cinzel); font-size:.6rem; color:var(--muted); position:relative; z-index:1; transition:all .3s; }
-  .progress-step.active .progress-dot { border-color:var(--gold); background:var(--gold); color:var(--black); }
-  .progress-step.done .progress-dot { border-color:var(--gold-dim); background:transparent; color:var(--gold); }
+  .progress-dot { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--cinzel); font-size:.6rem; position:relative; z-index:1; transition:all .3s; background:var(--bg,#08090c); border:1px solid rgba(196,160,90,0.3); color:rgba(196,160,90,0.3); }
+  .progress-step.active .progress-dot { border-color:var(--gold,#C4A05A); color:var(--gold,#C4A05A); background:var(--bg,#08090c); }
+  .progress-step.done .progress-dot { border-color:var(--gold,#C4A05A); background:var(--gold,#C4A05A); color:transparent; position:relative; }
+  .progress-step.done .progress-dot::after { content:'✦'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:var(--bg,#08090c); font-size:.5em; }
   .progress-label { font-family:var(--cinzel); font-size:.46rem; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; text-align:center; }
   .progress-step.active .progress-label { color:var(--gold); }
 
