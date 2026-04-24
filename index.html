@@ -655,14 +655,16 @@
           <div class="summary-row"><span class="summary-key">Initials</span><span class="summary-val" id="sum-initials">—</span></div>
           <div class="summary-row" id="sum-initials-extra-row" style="display:none;"><span class="summary-key" style="padding-left:1rem;">Initial Engraving</span><span class="summary-val" style="color:var(--gold);">+$75</span></div>
           <div class="summary-row"><span class="summary-key">Ring Size</span><span class="summary-val" id="sum-size">—</span></div>
-          <div class="summary-total"><span class="total-label">Total</span><span class="total-price" id="sum-total">$—</span></div>
+          <div class="summary-total"><span class="total-label">Order Total</span><span class="total-price" id="sum-total">$—</span></div>
+          <div class="summary-row" style="border-top:1px solid var(--border); margin-top:.5rem; padding-top:.8rem;"><span class="summary-key" style="color:var(--cream);">Due today (50% deposit)</span><span class="summary-val" style="color:var(--gold-light); font-style:normal;" id="sum-deposit">$—</span></div>
+          <div class="summary-row"><span class="summary-key">Balance due before shipping</span><span class="summary-val" id="sum-balance">$—</span></div>
         </div>
         <p style="font-size:.85rem; color:var(--muted); font-style:italic; margin-bottom:2rem;">Made by hand in America. Ships in three weeks. Fully insured.</p>
         <div class="wizard__nav wizard__nav--split">
           <button class="btn-nav btn-back" onclick="goStep(5)">&larr; Back</button>
           <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; width:100%; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
           <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; width:100%; margin-bottom:1rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
-          <button class="btn-nav btn-commission" id="btn-checkout" onclick="proceedToCheckout()">Commission This Ring &rarr;</button>
+          <button class="btn-nav btn-commission" id="btn-checkout" onclick="proceedToCheckout()">Submit Commission &amp; Pay Deposit &rarr;</button>
         </div>
         <p style="font-size:.78rem; color:var(--muted); text-align:center; margin-top:1.5rem; font-style:italic;">Secure payment via Stripe. SSL encrypted. Non-refundable once casting begins.</p>
       </div>
@@ -942,7 +944,11 @@ function buildSummary(){
   if(initialsExtraRow) initialsExtraRow.style.display = state.initialsEnabled ? '' : 'none';
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra+state.middleExtra;
+  const deposit=Math.ceil(total/2);
+  const balance=total-deposit;
   document.getElementById('sum-total').textContent = '$' + total;
+  document.getElementById('sum-deposit').textContent = '$' + deposit;
+  document.getElementById('sum-balance').textContent = '$' + balance;
   renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
