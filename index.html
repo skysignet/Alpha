@@ -290,7 +290,7 @@
     </div>
     <h1 class="hero__title">SkySignet</h1>
     <p class="hero__tagline">A map of the sky on the day you were born, worn on your hand</p>
-    <p class="hero__subtitle" style="line-height:1.6;"><span style="color:var(--gold-light);font-style:normal;">Silver, Platinum, and Gold. Responsibly sourced.</span><br>Conceived and designed by artist Jesse Sky.<br>Cast and finished by hand in America.</p>
+    <p class="hero__subtitle" style="line-height:1.6;"><span style="color:var(--gold-light);font-style:normal;">Bronze, Silver, Platinum, and Gold. Responsibly sourced.</span><br>Conceived and designed by artist Jesse Sky.<br>Cast and finished by hand in America.</p>
     <div style="display:inline-flex; flex-direction:column; align-items:stretch; margin:0 auto 2.5rem;">
       <div class="hero__image-placeholder">
         <img src="hero.jpg" style="width:100%; height:100%; object-fit:cover;">
@@ -308,7 +308,20 @@
   <div class="container">
     <div class="product-grid__cards">
 
-      <div class="product-card">
+      <div class="product-card" data-family="bronze">
+        <div class="product-card__img">
+          <span class="product-card__img-placeholder">Photo<br>coming soon</span>
+          <div class="product-card__hover">
+            <button class="btn-select-size" onclick="selectFromGrid('bronze',950)">Select Size</button>
+          </div>
+        </div>
+        <div class="product-card__info">
+          <p class="product-card__name">Earth Ring</p>
+          <p class="product-card__meta">Bronze &nbsp;·&nbsp; <span class="product-card__price">$950</span></p>
+        </div>
+      </div>
+
+      <div class="product-card" data-family="silver">
         <div class="product-card__img">
           <span class="product-card__img-placeholder">Photo<br>coming soon</span>
           <div class="product-card__hover">
@@ -321,7 +334,7 @@
         </div>
       </div>
 
-      <div class="product-card">
+      <div class="product-card" data-family="gold">
         <div class="product-card__img">
           <span class="product-card__img-placeholder">Photo<br>coming soon</span>
           <div class="product-card__hover">
@@ -334,7 +347,7 @@
         </div>
       </div>
 
-      <div class="product-card">
+      <div class="product-card" data-family="platinum">
         <div class="product-card__img">
           <span class="product-card__img-placeholder">Photo<br>coming soon</span>
           <div class="product-card__hover">
@@ -496,8 +509,9 @@
         <div class="field-group"><label class="field-label">Place of Birth</label><input type="text" class="field-input" id="birthplace" placeholder="City, Country"></div>
         <p class="finish-note">Birth time is required for accurate house placements. If unknown, enter 12:00 noon and we will note approximate houses on your certificate of provenance.</p>
         <div class="wizard__nav">
-          <button class="btn-nav btn-next" onclick="goStep(2)">Continue</button>
+          <button class="btn-nav btn-next" onclick="validateStep1()">Continue</button>
         </div>
+        <p id="step1-error" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;">Please complete all birth information to continue.</p>
       </div>
 
       <!-- STEP 2 -->
@@ -540,6 +554,10 @@
         <p class="panel-title">Choose your metal</p>
         <p class="panel-subtitle">Each carries its own weight and quality of light. All metals responsibly sourced and recycled.</p>
     <div class="option-grid">
+          <div class="option-card" onclick="selectMetal('bronze',950)" id="metal-bronze" data-family="bronze">
+            <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
+            <p class="option-card__name">Bronze</p><p class="option-card__desc">Earth metal. Ancient material. The design in its purest form.</p><p class="option-card__price">$950</p>
+          </div>
           <div class="option-card" onclick="selectMetal('silver',1500)" id="metal-silver">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
             <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar. Classic. The metal of maps and mirrors.</p><p class="option-card__price">$1500</p>
@@ -740,7 +758,7 @@ function selectSystem(s){
   }
 }
 
-const metalIds=['silver','silver-pd','silver-ox','platinum','gold14','gold18'];
+const metalIds=['bronze','silver','silver-pd','silver-ox','platinum','gold14','gold18'];
 function selectFromGrid(m,price){
   selectMetal(m,price);
   goStep(3);
@@ -899,7 +917,7 @@ async function submitChartEmail(){
 }
 
 const bandNames={dream:'Dream Portal',moroccan:'Moroccan Stars',acanthus:'Acanthus',diamond:'Stars & Diamonds'};
-const metalNames={'silver':'Sterling Silver','silver-pd':'Silver / Palladium','silver-ox':'Sterling Silver — Oxidized','platinum':'Platinum','gold14':'14k Yellow Gold','gold18':'18k Yellow Gold'};
+const metalNames={'bronze':'Bronze','silver':'Sterling Silver','silver-pd':'Silver / Palladium','silver-ox':'Sterling Silver — Oxidized','platinum':'Platinum','gold14':'14k Yellow Gold','gold18':'18k Yellow Gold'};
 
 function buildSummary(){
   const bd=document.getElementById('birthdate').value;
@@ -945,7 +963,7 @@ function buildSummary(){
 }
 
 const METAL_TO_TIER = {
-
+  'bronze':    'bronze',
   'silver':    'silver',
   'silver-pd': 'silver_pd',
   'gold14':    '14k',
@@ -960,7 +978,31 @@ const BAND_TO_KEY = {
   'diamond':  'stars_and_diamonds'
 };
 
+function validateStep1(){
+  const bd = document.getElementById('birthdate').value;
+  const bt = document.getElementById('birthtime').value;
+  const bp = document.getElementById('birthplace').value.trim();
+  const err = document.getElementById('step1-error');
+  if(!bd || !bt || !bp){
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  goStep(2);
+}
+
 async function proceedToCheckout(){
+  const bd = document.getElementById('birthdate').value;
+  const bt = document.getElementById('birthtime').value;
+  const bp = document.getElementById('birthplace').value.trim();
+  if(!bd || !bt || !bp){
+    goStep(1);
+    setTimeout(()=>{
+      const err = document.getElementById('step1-error');
+      if(err) err.style.display = 'block';
+    }, 400);
+    return;
+  }
   if(!state.metal){ alert('Please select a metal in Step 3.'); return; }
   if(!state.band){ alert('Please select a band in Step 4.'); return; }
 

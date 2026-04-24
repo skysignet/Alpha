@@ -33,7 +33,7 @@ WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 ORDERS_FILE = os.path.join(os.path.dirname(__file__), "..", "orders.json")
 
 TIERS = {
-    "bronze":     {"name": "SkySignet — Bronze",                  "price":    55000},
+    "bronze":     {"name": "SkySignet — Bronze",                  "price":    95000},
     "silver":     {"name": "SkySignet — Sterling Silver",         "price":   150000},
     "silver_ox":  {"name": "SkySignet — Sterling Silver Oxidized","price":   170000},
     "silver_pd":  {"name": "SkySignet — Silver & Palladium",      "price":   190000},
