@@ -315,7 +315,7 @@
         </div>
         <div class="product-card__info">
           <p class="product-card__name">Lunar Ring</p>
-          <p class="product-card__meta">Sterling Silver &nbsp;·&nbsp; <span class="product-card__price">$1,500</span></p>
+          <p class="product-card__meta">Sterling Silver &nbsp;·&nbsp; <span class="product-card__price">$1500</span></p>
         </div>
       </div>
 
@@ -328,7 +328,7 @@
         </div>
         <div class="product-card__info">
           <p class="product-card__name">Aura Ring</p>
-          <p class="product-card__meta">14k Yellow Gold &nbsp;·&nbsp; <span class="product-card__price">$7,700</span></p>
+          <p class="product-card__meta">14k Yellow Gold &nbsp;·&nbsp; <span class="product-card__price">$7700</span></p>
         </div>
       </div>
 
@@ -341,7 +341,7 @@
         </div>
         <div class="product-card__info">
           <p class="product-card__name">Stellar Ring</p>
-          <p class="product-card__meta">Platinum &nbsp;·&nbsp; <span class="product-card__price">$11,100</span></p>
+          <p class="product-card__meta">Platinum &nbsp;·&nbsp; <span class="product-card__price">$11100</span></p>
         </div>
       </div>
 
@@ -540,27 +540,27 @@
     <div class="option-grid">
           <div class="option-card" onclick="selectMetal('silver',1500)" id="metal-silver">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar. Classic. The metal of maps and mirrors.</p><p class="option-card__price">$1,500</p>
+            <p class="option-card__name">Sterling Silver</p><p class="option-card__desc">Lunar. Classic. The metal of maps and mirrors.</p><p class="option-card__price">$1500</p>
           </div>
           <div class="option-card" onclick="selectMetal('silver-pd',1900)" id="metal-silver-pd">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Silver / Palladium</p><p class="option-card__desc">Harder, whiter, more resistant to tarnish.</p><p class="option-card__price">$1,900</p>
+            <p class="option-card__name">Silver / Palladium</p><p class="option-card__desc">Harder, whiter, more resistant to tarnish.</p><p class="option-card__price">$1900</p>
           </div>
           <div class="option-card" onclick="selectMetal('silver-ox',1700)" id="metal-silver-ox">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Sterling Silver — Oxidized</p><p class="option-card__desc">Dark patina deepens the engraved lines. Sterling only.</p><p class="option-card__price">$1,700</p>
+            <p class="option-card__name">Sterling Silver — Oxidized</p><p class="option-card__desc">Dark patina deepens the engraved lines. Sterling only.</p><p class="option-card__price">$1700</p>
           </div>
           <div class="option-card" onclick="selectMetal('platinum',11100)" id="metal-platinum">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">Platinum</p><p class="option-card__desc">Rarer than gold. Cooler than silver. The most enduring metal on Earth.</p><p class="option-card__price">$11,100</p>
+            <p class="option-card__name">Platinum</p><p class="option-card__desc">Rarer than gold. Cooler than silver. The most enduring metal on Earth.</p><p class="option-card__price">$11100</p>
           </div>
           <div class="option-card" onclick="selectMetal('gold14',7700)" id="metal-gold14">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">14k Yellow Gold</p><p class="option-card__desc">Solar. Warm. The oldest sacred metal on Earth.</p><p class="option-card__price">$7,700</p>
+            <p class="option-card__name">14k Yellow Gold</p><p class="option-card__desc">Solar. Warm. The oldest sacred metal on Earth.</p><p class="option-card__price">$7700</p>
           </div>
           <div class="option-card" onclick="selectMetal('gold18',9800)" id="metal-gold18">
             <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">◎</span></div>
-            <p class="option-card__name">18k Yellow Gold</p><p class="option-card__desc">Richer color. Higher purity. Deeper warmth.</p><p class="option-card__price">$9,800</p>
+            <p class="option-card__name">18k Yellow Gold</p><p class="option-card__desc">Richer color. Higher purity. Deeper warmth.</p><p class="option-card__price">$9800</p>
           </div>
         </div>
         <div class="wizard__nav wizard__nav--split">
@@ -912,7 +912,7 @@ function buildSummary(){
   if(metalPriceRow){
     if(state.metal && state.metalPrice > 0){
       document.getElementById('sum-metal-price-label').textContent = metalNames[state.metal];
-      document.getElementById('sum-metal-price-val').textContent = '$' + state.metalPrice.toLocaleString('en-US');
+      document.getElementById('sum-metal-price-val').textContent = '$' + state.metalPrice;
       metalPriceRow.style.display = '';
     } else {
       metalPriceRow.style.display = 'none';
@@ -931,7 +931,7 @@ function buildSummary(){
   if(initialsExtraRow) initialsExtraRow.style.display = state.initialsEnabled ? '' : 'none';
   document.getElementById('sum-size').textContent=sz||'—';
   const total=state.metalPrice+state.bandExtra+state.middleExtra;
-  document.getElementById('sum-total').textContent = '$' + total.toLocaleString('en-US');
+  document.getElementById('sum-total').textContent = '$' + total;
   renderStoredOrrery('natal-orrery-wrap-review', 'natal-planets-table-review');
 }
 
