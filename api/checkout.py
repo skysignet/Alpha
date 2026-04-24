@@ -3,6 +3,7 @@ SkySignet Checkout API — Stripe + Flask
 Railway server: /api/checkout  /api/webhook
 
 POST /api/checkout
+Returns a PaymentIntent client_secret for Stripe Elements embedded payment.
 Body JSON:
   tier       bronze | silver | silver_pd | silver_ox | 14k | 18k | platinum
   band       (optional) dream_portal | moroccan_stars | acanthus | stars_and_diamonds
@@ -13,10 +14,10 @@ Body JSON:
   initials   (optional) e.g. J·W·P
   tradition  (optional) western | vedic
 
-Charges a 50% deposit at checkout. Balance is collected manually before shipping.
+Charges a 50% deposit. Balance is collected manually before shipping.
 
 POST /api/webhook
-Receives Stripe webhook events. On checkout.session.completed, appends order
+Receives Stripe webhook events. On payment_intent.succeeded, appends order
 record to orders.json with deposit_paid status.
 """
 import json
@@ -100,20 +101,11 @@ def checkout():
         deposit_cents = math.ceil(total_cents / 2)
         balance_cents = total_cents - deposit_cents
 
-        session = stripe.checkout.Session.create(
+        intent = stripe.PaymentIntent.create(
+            amount=deposit_cents,
+            currency="usd",
             payment_method_types=["card"],
-            line_items=[{
-                "price_data": {
-                    "currency": "usd",
-                    "unit_amount": deposit_cents,
-                    "product_data": {
-                        "name": f"{TIERS[tier]['name']} — 50% Deposit",
-                        "description": description,
-                    },
-                },
-                "quantity": 1,
-            }],
-            mode="payment",
+            description=f"{TIERS[tier]['name']} — 50% Deposit · {description}",
             metadata={
                 "tier":               tier,
                 "band":               band or "none",
@@ -128,11 +120,9 @@ def checkout():
                 "balance_cents":      str(balance_cents),
                 "payment_status":     "deposit_pending",
             },
-            success_url="https://skysignet.co/success.html?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="https://skysignet.co/#commission",
         )
 
-        body = json.dumps({"url": session.url})
+        body = json.dumps({"client_secret": intent.client_secret})
         status = 200
 
     except Exception as e:
@@ -152,15 +142,15 @@ def webhook():
     except (ValueError, stripe.error.SignatureVerificationError) as e:
         return Response(json.dumps({"error": str(e)}), status=400, mimetype='application/json')
 
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        meta    = session.get('metadata', {})
+    if event['type'] == 'payment_intent.succeeded':
+        intent  = event['data']['object']
+        meta    = intent.get('metadata', {})
         order   = {
             "timestamp":          datetime.utcnow().isoformat() + "Z",
-            "session_id":         session.get("id"),
+            "payment_intent_id":  intent.get("id"),
             "payment_status":     "deposit_paid",
-            "customer_email":     (session.get("customer_details") or {}).get("email"),
-            "amount_paid_cents":  session.get("amount_total"),
+            "customer_email":     (intent.get("charges", {}).get("data") or [{}])[0].get("billing_details", {}).get("email"),
+            "amount_paid_cents":  intent.get("amount_received"),
             "full_amount_cents":  meta.get("full_amount_cents"),
             "balance_cents":      meta.get("balance_cents"),
             "tier":               meta.get("tier"),

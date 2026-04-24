@@ -277,6 +277,7 @@
   .product-card__price { color:var(--gold); }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -675,11 +676,15 @@
           <div class="summary-row"><span class="summary-key">Balance due before shipping</span><span class="summary-val" id="sum-balance">$—</span></div>
         </div>
         <p style="font-size:.85rem; color:var(--muted); font-style:italic; margin-bottom:2rem;">Made by hand in America. Ships in three weeks. Fully insured.</p>
+        <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
+        <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:1.5rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
+        <div id="stripe-payment-wrap" style="margin-bottom:1.5rem; display:none;">
+          <div id="payment-element"></div>
+          <p id="stripe-error-msg" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;"></p>
+        </div>
         <div class="wizard__nav wizard__nav--split">
           <button class="btn-nav btn-back" onclick="goStep(5)">&larr; Back</button>
-          <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; width:100%; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
-          <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; width:100%; margin-bottom:1rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
-          <button class="btn-nav btn-commission" id="btn-checkout" onclick="proceedToCheckout()">Submit Commission &amp; Pay Deposit &rarr;</button>
+          <button class="btn-nav btn-commission" id="btn-checkout" onclick="submitPayment()">Submit Commission &amp; Pay Deposit &rarr;</button>
         </div>
         <p style="font-size:.78rem; color:var(--muted); text-align:center; margin-top:1.5rem; font-style:italic;">Secure payment via Stripe. SSL encrypted. Non-refundable once casting begins.</p>
       </div>
@@ -746,7 +751,7 @@ function goStep(n){
   });
   state.step=n;
   if(n===3) applyMetalFilter();
-  if(n===6) buildSummary();
+  if(n===6){ buildSummary(); mountStripeElements(); }
   window.scrollTo({top:document.getElementById('commission').offsetTop-80,behavior:'smooth'});
 }
 
@@ -1021,30 +1026,20 @@ function validateStep1(){
   goStep(2);
 }
 
-async function proceedToCheckout(){
+const STRIPE_PK = 'YOUR_STRIPE_PUBLISHABLE_KEY';
+let _stripe = null;
+let _stripeElements = null;
+
+async function mountStripeElements(){
   const bd = document.getElementById('birthdate').value;
   const bt = document.getElementById('birthtime').value;
   const bp = document.getElementById('birthplace').value.trim();
-  if(!bd || !bt || !bp){
-    goStep(1);
-    setTimeout(()=>{
-      const err = document.getElementById('step1-error');
-      if(err) err.style.display = 'block';
-    }, 400);
-    return;
-  }
-  if(!state.metal){ alert('Please select a metal in Step 3.'); return; }
-  if(!state.band){ alert('Please select a band in Step 4.'); return; }
+  if(!bd || !bt || !bp || !state.metal || !state.band) return;
 
   const sz = document.getElementById('ringsize') ? document.getElementById('ringsize').value : '';
   const i1 = (document.getElementById('initial1') ? document.getElementById('initial1').value : '').toUpperCase();
   const i2 = (document.getElementById('initial2') ? document.getElementById('initial2').value : '').toUpperCase();
   const i3 = (document.getElementById('initial3') ? document.getElementById('initial3').value : '').toUpperCase();
-
-  const btn = document.getElementById('btn-checkout');
-  const originalText = btn.textContent;
-  btn.textContent = 'Preparing your commission…';
-  btn.disabled = true;
 
   const payload = {
     tier:       METAL_TO_TIER[state.metal] || state.metal,
@@ -1064,16 +1059,40 @@ async function proceedToCheckout(){
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    if(data.url){
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'No checkout URL returned');
-    }
+    if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
+
+    _stripe = Stripe(STRIPE_PK);
+    _stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: { theme: 'night' } });
+    const paymentEl = _stripeElements.create('payment');
+    paymentEl.mount('#payment-element');
+    document.getElementById('stripe-payment-wrap').style.display = 'block';
   } catch(err){
-    console.error('Checkout error:', err);
-    btn.textContent = originalText;
+    console.error('Stripe mount error:', err);
+  }
+}
+
+async function submitPayment(){
+  if(!_stripe || !_stripeElements){
+    alert('Payment form not ready. Please wait a moment and try again.');
+    return;
+  }
+  const btn = document.getElementById('btn-checkout');
+  const msg = document.getElementById('stripe-error-msg');
+  btn.disabled = true;
+  btn.textContent = 'Processing…';
+  msg.style.display = 'none';
+
+  const { error } = await _stripe.confirmPayment({
+    elements: _stripeElements,
+    confirmParams: {
+      return_url: window.location.origin + '/confirmation.html',
+    }
+  });
+  if(error){
+    msg.textContent = error.message;
+    msg.style.display = 'block';
     btn.disabled = false;
-    alert('Something went wrong initiating checkout. Please try again or email jesseskydesign@gmail.com');
+    btn.textContent = 'Submit Commission & Pay Deposit →';
   }
 }
 
