@@ -849,7 +849,7 @@ function validateStep5(){
 }
 
 const STRIPE_PK = 'YOUR_STRIPE_PUBLISHABLE_KEY';
-let _stripe = null;
+let stripe = null;
 let stripeElements = null;
 
 async function mountStripeElements(){
@@ -888,9 +888,9 @@ async function mountStripeElements(){
     if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
     console.log('[SkySignet] client_secret received:', data.client_secret.slice(0,20)+'…');
 
-    _stripe = Stripe(STRIPE_PK);
-    console.log('[SkySignet] Stripe instance:', _stripe);
-    stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: {
+    stripe = Stripe(STRIPE_PK);
+    console.log('[SkySignet] Stripe instance:', stripe);
+    stripeElements = stripe.elements({ clientSecret: data.client_secret, appearance: {
       theme: 'night',
       variables: {
         colorPrimary: '#C4A05A',
@@ -920,7 +920,7 @@ async function submitPayment(){
   console.log('[SkySignet] stripeElements at submit time:', stripeElements);
   const btn = document.getElementById('btn-checkout');
   const msg = document.getElementById('stripe-error-msg');
-  if(!_stripe || !stripeElements){
+  if(!stripe || !stripeElements){
     console.error('[SkySignet] submitPayment: stripeElements is null');
     msg.textContent = 'Payment form failed to load. Please refresh and try again.';
     msg.style.display = 'block';
@@ -931,7 +931,7 @@ async function submitPayment(){
   btn.textContent = 'Processing…';
   msg.style.display = 'none';
 
-  const { error } = await _stripe.confirmPayment({
+  const { error } = await stripe.confirmPayment({
     elements: stripeElements,
     confirmParams: {
       return_url: window.location.origin + '/confirmation.html',
