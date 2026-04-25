@@ -878,7 +878,17 @@ async function mountStripeElements(){
     if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
 
     _stripe = Stripe(STRIPE_PK);
-    _stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: { theme: 'night' } });
+    _stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: {
+      theme: 'night',
+      variables: {
+        colorPrimary: '#C4A05A',
+        colorBackground: '#0d0e12',
+        colorText: '#e8e0d0',
+        colorDanger: '#c07070',
+        fontFamily: 'Cinzel, serif',
+        borderRadius: '2px',
+      }
+    }});
     const paymentEl = _stripeElements.create('payment');
     paymentEl.mount('#payment-element');
     document.getElementById('stripe-payment-wrap').style.display = 'block';
