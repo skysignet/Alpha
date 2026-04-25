@@ -850,7 +850,7 @@ function validateStep5(){
 
 const STRIPE_PK = 'YOUR_STRIPE_PUBLISHABLE_KEY';
 let _stripe = null;
-let _stripeElements = null;
+let stripeElements = null;
 
 async function mountStripeElements(){
   console.log('[SkySignet] mountStripeElements called');
@@ -890,7 +890,7 @@ async function mountStripeElements(){
 
     _stripe = Stripe(STRIPE_PK);
     console.log('[SkySignet] Stripe instance:', _stripe);
-    _stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: {
+    stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: {
       theme: 'night',
       variables: {
         colorPrimary: '#C4A05A',
@@ -901,7 +901,7 @@ async function mountStripeElements(){
         borderRadius: '2px',
       }
     }});
-    const paymentEl = _stripeElements.create('payment');
+    const paymentEl = stripeElements.create('payment');
     paymentEl.mount('#payment-element');
   } catch(err){
     console.error('[SkySignet] mountStripeElements error:', err);
@@ -917,11 +917,11 @@ async function mountStripeElements(){
 
 async function submitPayment(){
   console.log('[SkySignet] submitPayment called');
-  console.log('[SkySignet] _stripeElements at submit time:', _stripeElements);
+  console.log('[SkySignet] stripeElements at submit time:', stripeElements);
   const btn = document.getElementById('btn-checkout');
   const msg = document.getElementById('stripe-error-msg');
-  if(!_stripe || !_stripeElements){
-    console.error('[SkySignet] submitPayment: _stripeElements is null');
+  if(!_stripe || !stripeElements){
+    console.error('[SkySignet] submitPayment: stripeElements is null');
     msg.textContent = 'Payment form failed to load. Please refresh and try again.';
     msg.style.display = 'block';
     btn.disabled = false;
@@ -932,7 +932,7 @@ async function submitPayment(){
   msg.style.display = 'none';
 
   const { error } = await _stripe.confirmPayment({
-    elements: _stripeElements,
+    elements: stripeElements,
     confirmParams: {
       return_url: window.location.origin + '/confirmation.html',
     }
