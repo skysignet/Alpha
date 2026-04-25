@@ -887,12 +887,17 @@ async function mountStripeElements(){
     });
     const data = await res.json();
     console.log('[SkySignet] checkout response:', data);
-    if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
-    console.log('[SkySignet] client_secret received:', data.client_secret.slice(0,20)+'…');
+    const clientSecret = data.clientSecret || data.client_secret;
+    if(!clientSecret){
+      const errEl = document.getElementById('stripe-error-msg');
+      if(errEl){ errEl.textContent = 'Server error: ' + JSON.stringify(data); errEl.style.display = 'block'; }
+      return;
+    }
+    console.log('[SkySignet] clientSecret received:', clientSecret.slice(0,20)+'…');
 
     stripe = Stripe(STRIPE_PK);
     console.log('[SkySignet] Stripe instance:', stripe);
-    stripeElements = stripe.elements({ clientSecret: data.client_secret, appearance: {
+    stripeElements = stripe.elements({ clientSecret, appearance: {
       theme: 'night',
       variables: {
         colorPrimary: '#C4A05A',

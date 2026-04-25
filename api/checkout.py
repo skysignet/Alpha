@@ -26,7 +26,7 @@ import os
 from datetime import datetime
 
 import stripe
-from flask import Flask, request as flask_request, Response
+from flask import Flask, request as flask_request, Response, jsonify
 
 app = Flask(__name__)
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
@@ -59,6 +59,11 @@ def add_cors(response):
     response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
+
+
+@app.route('/api/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'ok'})
 
 
 @app.route('/api/checkout', methods=['POST', 'OPTIONS'])
@@ -122,7 +127,7 @@ def checkout():
             },
         )
 
-        body = json.dumps({"client_secret": intent.client_secret})
+        body = json.dumps({"clientSecret": intent.client_secret})
         status = 200
 
     except Exception as e:
