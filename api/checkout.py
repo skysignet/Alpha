@@ -25,13 +25,13 @@ import math
 import os
 from datetime import datetime
 
-import stripe
 from flask import Flask, request as flask_request, Response, jsonify
 from flask_cors import CORS
+import stripe
 
 app = Flask(__name__)
-CORS(app, origins=["https://www.skysignet.co", "https://skysignet.co"])
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+CORS(app, resources={r"/api/*": {"origins": ["https://www.skysignet.co", "https://skysignet.co"]}})
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 ORDERS_FILE = os.path.join(os.path.dirname(__file__), "..", "orders.json")
 
@@ -178,3 +178,5 @@ def webhook():
             json.dump(orders, f, indent=2)
 
     return Response(json.dumps({"received": True}), status=200, mimetype='application/json')
+
+print("Registered routes:", [str(rule) for rule in app.url_map.iter_rules()])
