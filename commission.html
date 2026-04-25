@@ -856,7 +856,7 @@ let stripeElements = null;
 
 async function mountStripeElements(){
   console.log('[SkySignet] mountStripeElements called');
-  const errMsg = document.getElementById('stripe-error-msg');
+  const errEl = document.getElementById('stripe-error-msg');
   const bd = document.getElementById('birthdate').value;
   const bt = document.getElementById('birthtime').value;
   const bp = document.getElementById('birthplace').value.trim();
@@ -889,36 +889,40 @@ async function mountStripeElements(){
     console.log('[SkySignet] checkout response:', data);
     const clientSecret = data.clientSecret || data.client_secret;
     if(!clientSecret){
-      const errEl = document.getElementById('stripe-error-msg');
       if(errEl){ errEl.textContent = 'Server error: ' + JSON.stringify(data); errEl.style.display = 'block'; }
       return;
     }
-    console.log('[SkySignet] clientSecret received:', clientSecret.slice(0,20)+'…');
+    console.log('[SkySignet] clientSecret received:', clientSecret.substring(0, 20) + '...');
 
     stripe = Stripe(STRIPE_PK);
     console.log('[SkySignet] Stripe instance:', stripe);
-    stripeElements = stripe.elements({ clientSecret, appearance: {
-      theme: 'night',
-      variables: {
-        colorPrimary: '#C4A05A',
-        colorBackground: '#0d0e12',
-        colorText: '#e8e0d0',
-        colorDanger: '#c07070',
-        fontFamily: 'Cinzel, serif',
-        borderRadius: '2px',
+    stripeElements = stripe.elements({
+      clientSecret,
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#C4A05A',
+          colorBackground: '#0d0e12',
+          colorText: '#e8e0d0',
+          colorDanger: '#c07070',
+          fontFamily: 'Cinzel, serif',
+          borderRadius: '2px',
+        }
       }
-    }});
+    });
+
     const paymentEl = stripeElements.create('payment');
     paymentEl.mount('#payment-element');
-  } catch(err){
+
+    setTimeout(() => {
+      const el = document.getElementById('payment-element');
+      console.log('[SkySignet] payment-element children after mount:', el.childElementCount, 'height:', el.offsetHeight);
+    }, 1000);
+
+  } catch(err) {
     console.error('[SkySignet] mountStripeElements error:', err);
-    const errEl = document.getElementById('stripe-error-msg');
-    if(errEl){
-      errEl.style.display = 'block';
-      errEl.textContent = err.name === 'AbortError'
-        ? 'Payment server timed out. Please try again.'
-        : 'Payment setup error: ' + err.message;
-    }
+    errEl.textContent = 'Payment setup error: ' + err.message;
+    errEl.style.display = 'block';
   }
 }
 
