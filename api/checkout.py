@@ -27,8 +27,10 @@ from datetime import datetime
 
 import stripe
 from flask import Flask, request as flask_request, Response, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins=["https://www.skysignet.co", "https://skysignet.co"])
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 ORDERS_FILE = os.path.join(os.path.dirname(__file__), "..", "orders.json")
@@ -53,13 +55,6 @@ BAND_PRICE     = 50000   # $500.00
 INITIALS_PRICE = 7500    # $75.00
 
 
-@app.after_request
-def add_cors(response):
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-    return response
-
 
 @app.route('/api/health', methods=['GET'])
 def health():
@@ -69,7 +64,11 @@ def health():
 @app.route('/api/checkout', methods=['POST', 'OPTIONS'])
 def checkout():
     if flask_request.method == 'OPTIONS':
-        return Response("", status=200)
+        response = jsonify({})
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response, 204
 
     try:
         data = flask_request.get_json(force=True)
