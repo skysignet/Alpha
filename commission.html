@@ -442,9 +442,13 @@
         </div>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Ring Size (US)</label>
-          <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;" oninput="document.getElementById('btn-step5-continue').disabled=!this.value.trim()">
+          <input type="number" class="field-input" id="ringsize" placeholder="e.g. 8.5" min="3" max="15" step="0.5" style="max-width:200px;" oninput="validateStep5()">
         </div>
         <p class="finish-note">Unsure of your size? A sizing guide will be included in your confirmation email, or any jeweler can measure you in minutes at no charge.</p>
+        <div class="field-group" style="margin-top:1.5rem;">
+          <label class="field-label">Email address for order confirmation</label>
+          <input type="email" class="field-input" id="commissionEmail" placeholder="your@email.com" autocomplete="email" oninput="validateStep5()">
+        </div>
         <div class="field-group" style="margin-top:1.5rem;">
           <label class="field-label">Notes</label>
           <textarea class="field-input" id="notes" rows="3" placeholder="Additional requests, gift messaging, or questions..."></textarea>
@@ -478,7 +482,6 @@
         <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
         <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:1.5rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
         <div id="stripe-payment-wrap" style="margin-bottom:1.5rem; display:none;">
-          <input id="commissionEmail" type="email" placeholder="Your email address" autocomplete="email" style="width:100%;margin-bottom:1.5rem;padding:.85rem 1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(196,160,90,0.3);color:#e8e0d0;font-family:var(--cinzel);letter-spacing:.1em;font-size:.72rem;outline:none;">
           <div id="payment-element"></div>
           <p id="stripe-error-msg" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;"></p>
         </div>
@@ -838,6 +841,13 @@ function validateStep1(){
   goStep(2);
 }
 
+function validateStep5(){
+  const sz = (document.getElementById('ringsize')||{}).value||'';
+  const em = (document.getElementById('commissionEmail')||{}).value||'';
+  const valid = sz.trim() && em.trim() && em.includes('@');
+  document.getElementById('btn-step5-continue').disabled = !valid;
+}
+
 const STRIPE_PK = 'YOUR_STRIPE_PUBLISHABLE_KEY';
 let _stripe = null;
 let _stripeElements = null;
@@ -876,8 +886,10 @@ async function mountStripeElements(){
     const data = await res.json();
     console.log('[SkySignet] checkout response:', data);
     if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
+    console.log('[SkySignet] client_secret received:', data.client_secret.slice(0,20)+'…');
 
     _stripe = Stripe(STRIPE_PK);
+    console.log('[SkySignet] Stripe instance:', _stripe);
     _stripeElements = _stripe.elements({ clientSecret: data.client_secret, appearance: {
       theme: 'night',
       variables: {
@@ -906,6 +918,7 @@ async function mountStripeElements(){
 
 async function submitPayment(){
   console.log('[SkySignet] submitPayment called');
+  console.log('[SkySignet] _stripeElements at submit time:', _stripeElements);
   const btn = document.getElementById('btn-checkout');
   const msg = document.getElementById('stripe-error-msg');
   if(!_stripe || !_stripeElements){
