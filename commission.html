@@ -389,6 +389,10 @@
             <div class="option-card__img"><img src="platinumring.png" alt="Platinum ring" style="width:100%; height:100%; object-fit:cover; border-radius:4px;"></div>
             <p class="option-card__name">Platinum</p><p class="option-card__desc">Shines like starlight. Heavier than gold. Endures.</p><p class="option-card__price">$11000</p>
           </div>
+          <div class="option-card" onclick="selectMetal('ether',1)" id="metal-ether" data-family="ether" style="opacity:0.5;">
+            <div class="option-card__img"><span style="font-size:1.4rem; opacity:.35;">✦</span></div>
+            <p class="option-card__name">Ether</p><p class="option-card__desc">For testing only.</p><p class="option-card__price">$1</p>
+          </div>
         </div>
         <div class="wizard__nav wizard__nav--split">
           <button class="btn-nav btn-back" onclick="goStep(2)">&larr; Back</button>
@@ -815,7 +819,8 @@ const METAL_TO_TIER = {
   'gold14':    '14k',
   'gold18':    '18k',
   'platinum':  'platinum',
-  'silver-ox': 'silver_ox'
+  'silver-ox': 'silver_ox',
+  'ether':     'ether'
 };
 const BAND_TO_KEY = {
   'dream':    'dream_portal',

@@ -43,6 +43,7 @@ TIERS = {
     "14k":        {"name": "SkySignet — 14k Yellow Gold",         "price":   770000},
     "18k":        {"name": "SkySignet — 18k Yellow Gold",         "price":   980000},
     "platinum":   {"name": "SkySignet — Platinum",                "price":  1100000},
+    "ether":      {"name": "SkySignet — Ether (test)",            "price":       100},
 }
 
 BAND_ADDON = {
