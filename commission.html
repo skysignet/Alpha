@@ -843,6 +843,8 @@ let _stripe = null;
 let _stripeElements = null;
 
 async function mountStripeElements(){
+  console.log('[SkySignet] mountStripeElements called');
+  const errMsg = document.getElementById('stripe-error-msg');
   const bd = document.getElementById('birthdate').value;
   const bt = document.getElementById('birthtime').value;
   const bp = document.getElementById('birthplace').value.trim();
@@ -865,12 +867,14 @@ async function mountStripeElements(){
   };
 
   try {
+    console.log('[SkySignet] fetching client_secret with payload:', payload);
     const res = await fetch('https://alpha-production-1b1b.up.railway.app/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
+    console.log('[SkySignet] checkout response:', data);
     if(!data.client_secret) throw new Error(data.error || 'No client secret returned');
 
     _stripe = Stripe(STRIPE_PK);
@@ -879,17 +883,25 @@ async function mountStripeElements(){
     paymentEl.mount('#payment-element');
     document.getElementById('stripe-payment-wrap').style.display = 'block';
   } catch(err){
-    console.error('Stripe mount error:', err);
+    console.error('[SkySignet] mountStripeElements error:', err);
+    if(errMsg){
+      errMsg.textContent = 'Payment form failed to load: ' + err.message;
+      errMsg.style.display = 'block';
+    }
   }
 }
 
 async function submitPayment(){
-  if(!_stripe || !_stripeElements){
-    alert('Payment form not ready. Please wait a moment and try again.');
-    return;
-  }
+  console.log('[SkySignet] submitPayment called');
   const btn = document.getElementById('btn-checkout');
   const msg = document.getElementById('stripe-error-msg');
+  if(!_stripe || !_stripeElements){
+    console.error('[SkySignet] submitPayment: _stripeElements is null');
+    msg.textContent = 'Payment form failed to load. Please refresh and try again.';
+    msg.style.display = 'block';
+    btn.disabled = false;
+    return;
+  }
   btn.disabled = true;
   btn.textContent = 'Processing…';
   msg.style.display = 'none';
