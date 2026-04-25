@@ -894,9 +894,12 @@ async function mountStripeElements(){
     document.getElementById('stripe-payment-wrap').style.display = 'block';
   } catch(err){
     console.error('[SkySignet] mountStripeElements error:', err);
-    if(errMsg){
-      errMsg.textContent = 'Payment form failed to load: ' + err.message;
-      errMsg.style.display = 'block';
+    const errEl = document.getElementById('stripe-error-msg');
+    if(errEl){
+      errEl.style.display = 'block';
+      errEl.textContent = err.name === 'AbortError'
+        ? 'Payment server timed out. Please try again.'
+        : 'Payment setup error: ' + err.message;
     }
   }
 }
