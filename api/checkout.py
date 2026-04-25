@@ -179,4 +179,7 @@ def webhook():
 
     return Response(json.dumps({"received": True}), status=200, mimetype='application/json')
 
-print("Registered routes:", [str(rule) for rule in app.url_map.iter_rules()])
+print("=== REGISTERED ROUTES ===")
+for rule in app.url_map.iter_rules():
+    print(f"  {rule.methods} {rule}")
+print("===========================")
