@@ -481,7 +481,7 @@
         <p style="font-size:.85rem; color:var(--muted); font-style:italic; margin-bottom:2rem;">Made by hand in America. Ships in three weeks. Fully insured.</p>
         <p style="font-size:.88rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:.5rem;">Jesse Sky reviews and approves every commission before casting begins.</p>
         <p style="font-size:.82rem; color:var(--muted); font-style:italic; text-align:center; margin-bottom:1.5rem;">A 50% deposit initiates the customization and casting process. The remaining balance is collected prior to shipping.</p>
-        <div id="stripe-payment-wrap" style="margin-bottom:1.5rem; display:none;">
+        <div id="stripe-payment-wrap" style="margin-bottom:1.5rem; display:block;">
           <div id="payment-element"></div>
           <p id="stripe-error-msg" style="font-family:var(--cinzel);font-size:.58rem;letter-spacing:.18em;color:#c07070;text-align:center;margin-top:1rem;display:none;"></p>
         </div>
@@ -903,7 +903,6 @@ async function mountStripeElements(){
     }});
     const paymentEl = _stripeElements.create('payment');
     paymentEl.mount('#payment-element');
-    document.getElementById('stripe-payment-wrap').style.display = 'block';
   } catch(err){
     console.error('[SkySignet] mountStripeElements error:', err);
     const errEl = document.getElementById('stripe-error-msg');
