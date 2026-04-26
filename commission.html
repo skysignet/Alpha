@@ -872,6 +872,7 @@ async function mountStripeElements(){
   const i2 = (document.getElementById('initial2') ? document.getElementById('initial2').value : '').toUpperCase();
   const i3 = (document.getElementById('initial3') ? document.getElementById('initial3').value : '').toUpperCase();
 
+  console.log('[SkySignet] band value in payload:', state.band);
   const payload = {
     tier:       METAL_TO_TIER[state.metal] || state.metal,
     band:       BAND_TO_KEY[state.band] || state.band,

@@ -74,7 +74,8 @@ def checkout():
     try:
         data = flask_request.get_json(force=True)
         tier       = data.get("tier", "").lower()
-        band       = data.get("band", "").lower()
+        band       = data.get("band", "")
+        print(f"[DEBUG] band received: {repr(band)}")
         birthdate  = data.get("birthdate", "")
         birthtime  = data.get("birthtime", "")
         birthplace = data.get("birthplace", "")
@@ -96,9 +97,14 @@ def checkout():
         description = " · ".join(details) if details else "Bespoke natal chart signet ring"
 
         # Calculate full order total
-        total_cents = TIERS[tier]["price"]
-        if band and band in BAND_ADDON:
-            total_cents += BAND_PRICE
+        band_prices = {
+            'stars_and_diamonds': 50000,
+            'stars-and-diamonds': 50000,
+            'band-diamond':       50000,
+        }
+        band_addon = band_prices.get(str(band).strip().lower(), 0)
+        print(f"[DEBUG] band_addon: {band_addon}")
+        total_cents = TIERS[tier]["price"] + band_addon
         if initials:
             total_cents += INITIALS_PRICE
 
