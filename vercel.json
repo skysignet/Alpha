@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/commission", "destination": "/commission.html" },
-    { "source": "/confirmation", "destination": "/confirmation.html" }
+    { "source": "/confirmation", "destination": "/confirmation.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
   ]
 }
