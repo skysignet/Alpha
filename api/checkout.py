@@ -96,21 +96,27 @@ def checkout():
         if initials:   details.append(f"Initials: {initials}")
         description = " · ".join(details) if details else "Bespoke natal chart signet ring"
 
-        # Calculate full order total
+        frontend_total = int(data.get('total_cents', 0))
+
+        # Recalculate server-side for verification
         band_prices = {
             'stars_and_diamonds': 50000,
             'stars-and-diamonds': 50000,
             'band-diamond':       50000,
         }
         band_addon = band_prices.get(str(band).strip().lower(), 0)
-        print(f"[DEBUG] band_addon: {band_addon}")
-        total_cents = TIERS[tier]["price"] + band_addon
+        server_total = TIERS.get(tier, {}).get('price', 150000) + band_addon
         if initials:
-            total_cents += INITIALS_PRICE
+            server_total += INITIALS_PRICE
 
-        # Charge 50% deposit (round up to nearest cent)
+        # Log any mismatch
+        if frontend_total and abs(frontend_total - server_total) > 100:
+            print(f"[WARNING] Total mismatch: frontend={frontend_total} server={server_total}")
+
+        # Use server total as authoritative (prevents manipulation)
+        total_cents = server_total
         deposit_cents = math.ceil(total_cents / 2)
-        balance_cents = total_cents - deposit_cents
+        print(f"[DEBUG] tier={tier} band={band} band_addon={band_addon} total={total_cents} deposit={deposit_cents}")
 
         intent = stripe.PaymentIntent.create(
             amount=deposit_cents,
